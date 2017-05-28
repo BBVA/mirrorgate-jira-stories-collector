@@ -1,0 +1,110 @@
+/*
+ * Copyright 2017 Banco Bilbao Vizcaya Argentaria, S.A.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.bbva.arq.devops.ae.mirrorgate.collectors.jira;
+
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.api.CollectorService;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.api.SprintService;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.model.Issue;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.model.Sprint;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service.IssuesService;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Pageable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * Created by alfonso on 26/05/17.
+ */
+@Component
+public class Main {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
+
+    @Autowired
+    private SprintService sprintApi;
+
+    @Autowired
+    private CollectorService collectorApi;
+
+    @Autowired
+    private IssuesService service;
+
+
+    private void iterateAndSave(Pageable<Issue> pagedIssues, boolean updateCollectorsDate) {
+        List<Issue> issues;
+
+        while ((issues = pagedIssues.nextPage()).size() > 0) {
+            LOGGER.info("-> Saving: " + issues);
+            sprintApi.sendIssues(issues);
+            if(updateCollectorsDate) {
+                collectorApi.update(issues.get(issues.size() - 1).getUpdatedDate());
+            }
+        }
+    }
+
+    private List<Sprint> getSprintsThatNeedUpdating() {
+        final List<Sprint> sprints = sprintApi.getSprintSamples();
+
+        final List<Long> ids = new ArrayList<>();
+        final Map<Long, Sprint> idToSprint = new HashMap<>(ids.size() * 2);
+
+        sprints.forEach((s) -> {
+            for (Issue issue : s.getIssues()) {
+                idToSprint.put(issue.getId(), s);
+                ids.add(issue.getId());
+            }
+        });
+
+        Pageable<Issue> samples = service.getById(ids);
+
+        List<Sprint> toUpdate = new ArrayList<>();
+        List<Issue> issues;
+        while ((issues = samples.nextPage()).size() > 0) {
+            LOGGER.info("-> Checking " + issues.get(0));
+            issues.forEach((i) -> {
+                Sprint current = i.getSprint();
+                if(current == null || !current.equals(idToSprint.get(i.getId()))) {
+                    toUpdate.add(i.getSprint());
+                }
+            });
+        }
+        LOGGER.info("-> Needs updating: " + toUpdate);
+        return toUpdate;
+    }
+
+    public void main() {
+
+        LOGGER.info("Starting");
+        iterateAndSave(service.getRecentIssues(), true);
+
+        for(Sprint s : getSprintsThatNeedUpdating()) {
+            Sprint sprint = sprintApi.getSprint(s.getId());
+            if(sprint != null && sprint.getIssues() != null) {
+                List<Long> ids = sprint.getIssues().stream().map(Issue::getId).collect(Collectors.toList());
+                iterateAndSave(service.getById(ids), false);
+            } else {
+                LOGGER.warn("-> Could not update the sprint " + s.getName());
+            }
+        }
+
+        LOGGER.info("Ending");
+    }
+}

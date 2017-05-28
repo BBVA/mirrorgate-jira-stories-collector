@@ -1,0 +1,38 @@
+ buildscript {
+	ext {
+		springBootVersion = '1.5.3.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+    maven {
+        name "atlassian-public"
+        url "https://m2proxy.atlassian.com/repository/public"
+    }
+}
+
+
+dependencies {
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.8.8'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.8'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.8'
+    compile('org.springframework.boot:spring-boot-starter')
+	compile('com.atlassian.jira:jira-rest-java-client-core:4.0.0')
+    compile('com.atlassian.fugue:fugue:2.6.1')
+    compile('org.springframework:spring-web')
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+}
