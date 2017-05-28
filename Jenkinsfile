@@ -22,7 +22,7 @@ node('global') {
 
     stage('Build jar file') {
         sh """
-            ./gradlew clean build test jacocoTestReport
+            ./gradlew clean build
         """
     }
 
