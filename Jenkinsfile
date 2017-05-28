@@ -16,6 +16,10 @@
 
 node('global') {
 
+    stage('Checkout') {
+        checkout(scm)
+    }
+
     stage('Build jar file') {
         sh """
             ./gradlew clean build test jacocoTestReport
