@@ -2,7 +2,7 @@
 
 ![MirrorGate](./media/images/logo-ae.png)
 
-## Running the collector
+## Running the collector with docker
 
 you can execute the collector using Docker
 
@@ -11,6 +11,10 @@ docker run -e "JIRA_URL=http://my.jira.corp" -e "JIRA_USERNAME=admin" -e "JIRA_P
 ```
 
 You can also specify MIRRORGATE_USERNAME and MIRRORGATE_PASSWORD if it's secured.
+
+## Running in Amazon Lambda
+
+Create a lambda with the folowing handler class `com.bbva.arq.devops.ae.mirrorgate.collectors.jira.LambdaHandler`. Note it will execute only once, so you will have to use a timed trigger to execute it eventually.
 
 ## Configuring
 
