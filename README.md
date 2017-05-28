@@ -24,10 +24,10 @@ Note you can change the property names so that it's letters are uppercase and us
 
 # Development instructions
 
-Run unit tests
+Run build and test
 
-    ./gradlew test
+```sh
+./gradlew clean build
+```
 
-Create an HPI file to install in Jenkins (HPI file will be in `target/mirrorgate-publisher.hpi`).
-
-    ./gradlew clean build
+You will get a jar file generated in `build/libs/`
