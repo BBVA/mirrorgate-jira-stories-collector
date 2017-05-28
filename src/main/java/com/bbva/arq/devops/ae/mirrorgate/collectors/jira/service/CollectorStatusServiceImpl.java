@@ -20,7 +20,6 @@ import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.api.CollectorService;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;

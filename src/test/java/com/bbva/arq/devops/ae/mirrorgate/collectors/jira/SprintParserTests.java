@@ -16,21 +16,17 @@
 
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira;
 
-import static org.junit.Assert.*;
-
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.model.Sprint;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.model.SprintStatus;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueUtils;
 import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.PropertySources;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.junit.Assert.assertEquals;
 
 
 /**

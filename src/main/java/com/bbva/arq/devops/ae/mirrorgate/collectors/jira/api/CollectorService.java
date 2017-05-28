@@ -17,19 +17,13 @@
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.api;
 
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config;
-import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.model.Issue;
-import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.model.Sprint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created by alfonso on 26/05/17.

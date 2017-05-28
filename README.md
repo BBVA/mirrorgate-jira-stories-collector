@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/BBVA/mirrorgate-jenkins-builds-collector.svg?branch=develop)](https://travis-ci.org/BBVA/mirrorgate-jenkins-builds-collector)
-
 # MirrorGate collector for Jira
 
 ![MirrorGate](./media/images/logo-ae.png)

@@ -17,7 +17,6 @@
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config;
 
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueFields;
-import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
