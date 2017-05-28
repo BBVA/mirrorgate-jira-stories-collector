@@ -34,5 +34,11 @@ dependencies {
 	compile('com.atlassian.jira:jira-rest-java-client-core:4.0.0')
     compile('com.atlassian.fugue:fugue:2.6.1')
     compile('org.springframework:spring-web')
+
+	compile (
+			'com.amazonaws:aws-lambda-java-core:1.1.0',
+			'com.amazonaws:aws-lambda-java-events:1.1.0'
+	)
+
 	testCompile('org.springframework.boot:spring-boot-starter-test')
 }

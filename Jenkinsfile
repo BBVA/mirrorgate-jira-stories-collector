@@ -22,4 +22,25 @@ node('global') {
         """
     }
 
+    if(env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop') {
+        stage('Docker - build docker image') {
+            sh """
+            docker build -t bbvaae/mirrorgate-jira-stories-collector .
+            """
+        }
+
+        /*stage('Docker - push') {
+            if(env.BRANCH_NAME == 'master') {
+                sh """
+                    docker tag bbvaae/mirrorgate-jira-stories-collector bbvaae/mirrorgate-jira-stories-collector:release
+                    docker push bbvaae/mirrorgate-jira-stories-collector:release
+                """
+            }
+            sh """
+                docker tag bbvaae/mirrorgate-jira-stories-collector bbvaae/mirrorgate-jira-stories-collector:latest
+                docker push bbvaae/mirrorgate-jira-stories-collector:latest
+            """
+        }*/
+    }
+
 }

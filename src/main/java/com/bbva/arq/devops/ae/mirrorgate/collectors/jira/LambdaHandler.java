@@ -16,13 +16,18 @@
 
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira;
 
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
-public class MirrorgateJiraStoriesCollectorApplication {
+public class LambdaHandler implements RequestHandler<Object, String> {
 
-	public static void main(String[] args) {
-		SpringApplication.run(MirrorgateJiraStoriesCollectorApplication.class, args);
-	}
+    @Override
+    public String handleRequest(Object input, Context context) {
+
+        SpringApplication.run(MirrorgateJiraStoriesCollectorApplication.class)
+                .getBean(Main.class).run();
+
+        return null;
+    }
 }

@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package com.bbva.arq.devops.ae.mirrorgate.collectors.jira;
+package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
-public class MirrorgateJiraStoriesCollectorApplication {
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
-	public static void main(String[] args) {
-		SpringApplication.run(MirrorgateJiraStoriesCollectorApplication.class, args);
-	}
+
+@Configuration
+@Profile("scheduled")
+@EnableScheduling
+public class SchedulerConfig {
+
 }
