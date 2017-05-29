@@ -35,7 +35,7 @@ node('global') {
 
         stage('Docker - push') {
             withCredentials([[$class : 'UsernamePasswordMultiBinding',
-                              credentialsId   : "bot-mirrorgate-dh  ",
+                              credentialsId   : "bot-mirrorgate-dh",
                               usernameVariable: 'DOCKER_USER',
                               passwordVariable: 'DOCKER_PASSWORD']]) {
                 if (env.BRANCH_NAME == 'master') {
