@@ -16,13 +16,21 @@
 
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira;
 
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.SchedulerConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
+
+import java.util.Arrays;
 
 @SpringBootApplication
 public class MirrorgateJiraStoriesCollectorApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(MirrorgateJiraStoriesCollectorApplication.class, args);
+		ConfigurableApplicationContext ctx = SpringApplication.run(MirrorgateJiraStoriesCollectorApplication.class, args);
+
+		if(!Arrays.asList(ctx.getEnvironment().getActiveProfiles()).contains(SchedulerConfig.PROFILE)) {
+			ctx.getBean(Main.class).run();
+		}
 	}
 }

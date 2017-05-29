@@ -23,8 +23,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 
 @Configuration
-@Profile("scheduled")
+@Profile(SchedulerConfig.PROFILE)
 @EnableScheduling
 public class SchedulerConfig {
+
+    public static final String PROFILE="scheduled";
 
 }
