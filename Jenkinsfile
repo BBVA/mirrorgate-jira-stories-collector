@@ -26,6 +26,13 @@ node('global') {
         """
     }
 
+    stage('Publish on Jenkins') {
+            sh """
+                mv build/libs/*.jar build/libs/mirrorgate_jira_stories_collector-1.0-SNAPSHOT-all.jar
+            """
+      	    step([$class: "ArtifactArchiver", artifacts: "build/libs/mirrorgate_jira_stories_collector-1.0-SNAPSHOT-all.jar", fingerprint: true])
+    }
+
     if(env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop') {
         stage('Docker - build docker image') {
             sh """
