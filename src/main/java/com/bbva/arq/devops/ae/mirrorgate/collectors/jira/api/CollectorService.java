@@ -17,10 +17,14 @@
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.api;
 
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Date;
@@ -30,6 +34,8 @@ import java.util.Date;
  */
 @Component
 public class CollectorService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CollectorService.class);
 
     @Value("${mirrorgate.url}")
     private String mirrorGateUrl;
@@ -48,7 +54,18 @@ public class CollectorService {
     }
 
     public Date getUpdatedDate() {
-        return restTemplate.getForObject(mirrorGateUrl + MIRROR_GATE_COLLECTOR_ENDPOINT, Date.class, appName);
+        try {
+            return restTemplate.getForObject(mirrorGateUrl + MIRROR_GATE_COLLECTOR_ENDPOINT, Date.class, appName);
+        }
+        catch (final HttpClientErrorException e) {
+            if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                LOGGER.info("Not previous execution date found. Running from the very beginning so this could take a while");
+                return null;
+            } else {
+                LOGGER.error("Error requesting previous collector status", e);
+                throw e;
+            }
+        }
     }
 
 }
