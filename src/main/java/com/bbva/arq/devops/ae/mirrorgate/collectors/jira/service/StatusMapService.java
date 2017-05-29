@@ -16,7 +16,7 @@
 
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service;
 
-import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.model.IssueStatus;
+import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssueStatus;
 
 import java.util.Map;
 

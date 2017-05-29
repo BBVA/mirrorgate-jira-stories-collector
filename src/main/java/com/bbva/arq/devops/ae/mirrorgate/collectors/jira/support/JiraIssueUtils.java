@@ -19,8 +19,8 @@ package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.IssueField;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.FieldsConfig;
-import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.model.Sprint;
-import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.model.SprintStatus;
+import com.bbva.arq.devops.ae.mirrorgate.core.dto.SprintDTO;
+import com.bbva.arq.devops.ae.mirrorgate.core.utils.SprintStatus;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -100,7 +100,7 @@ public class JiraIssueUtils {
         return null;
     }
 
-    public Sprint getPriorSprint(Object o) {
+    public SprintDTO getPriorSprint(Object o) {
         if(o == null) {
             return null;
         }
@@ -125,20 +125,20 @@ public class JiraIssueUtils {
         return getPriorSprint(sprints);
     }
 
-    public Sprint getPriorSprint(List<String> data) {
-        List<Sprint> sprints = getSprintList(data);
+    public SprintDTO getPriorSprint(List<String> data) {
+        List<SprintDTO> sprints = getSprintList(data);
         return sprints == null || sprints.size() == 0?
                 null:
                 sprints.get(0);
     }
 
-    public List<Sprint> getSprintList(List<String> data) {
+    public List<SprintDTO> getSprintList(List<String> data) {
         return data == null ?
                 null:
                 data.stream().map(this::parseSprint).collect(Collectors.toList());
     }
 
-    public Sprint parseSprint(String data) {
+    public SprintDTO parseSprint(String data) {
         if(data == null || !data.startsWith("com.atlassian.greenhopper.service.sprint.Sprint")){
             return null;
         }
@@ -149,7 +149,7 @@ public class JiraIssueUtils {
         while(match.find()) {
             fieldsAndValue.put(match.group(1), match.group(2));
         }
-        return new Sprint()
+        return new SprintDTO()
                 .setId(fieldsAndValue.get("id"))
                 .setStatus(parse(fieldsAndValue.get("state"),SprintStatus.class))
                 .setName(fieldsAndValue.get("name"))

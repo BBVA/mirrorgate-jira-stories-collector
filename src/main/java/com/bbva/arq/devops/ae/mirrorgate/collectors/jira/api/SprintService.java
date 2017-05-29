@@ -17,8 +17,8 @@
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.api;
 
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config;
-import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.model.Issue;
-import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.model.Sprint;
+import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
+import com.bbva.arq.devops.ae.mirrorgate.core.dto.SprintDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,16 +46,16 @@ public class SprintService {
     @Qualifier(Config.MIRRORGATE_REST_TEMPLATE)
     RestTemplate restTemplate;
 
-    public ResponseEntity<List> sendIssues(List<Issue> issues) {
+    public ResponseEntity<List> sendIssues(List<IssueDTO> issues) {
         return restTemplate.postForEntity(mirrorGateUrl + MIRROR_GATE_SEND_ISSUES_ENDPOINT, issues, List.class);
     }
 
-    public List<Sprint> getSprintSamples() {
-        return Arrays.asList(restTemplate.getForObject(mirrorGateUrl + MIRROR_GATE_GET_SPRINT_SAMPLE_ENDPOINT,Sprint[].class));
+    public List<SprintDTO> getSprintSamples() {
+        return Arrays.asList(restTemplate.getForObject(mirrorGateUrl + MIRROR_GATE_GET_SPRINT_SAMPLE_ENDPOINT,SprintDTO[].class));
     }
 
-    public Sprint getSprint(String name) {
-        return restTemplate.getForObject(mirrorGateUrl + MIRROR_GATE_GET_SPRINT_ISSUES_ENDPOINT, Sprint.class, name);
+    public SprintDTO getSprint(String name) {
+        return restTemplate.getForObject(mirrorGateUrl + MIRROR_GATE_GET_SPRINT_ISSUES_ENDPOINT, SprintDTO.class, name);
     }
 
 }

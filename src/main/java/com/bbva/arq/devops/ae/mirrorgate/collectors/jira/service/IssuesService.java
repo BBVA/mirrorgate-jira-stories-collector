@@ -16,7 +16,7 @@
 
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service;
 
-import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.model.Issue;
+import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Pageable;
 
 import java.util.List;
@@ -26,8 +26,8 @@ import java.util.List;
  */
 public interface IssuesService {
 
-    Pageable<Issue> getRecentIssues();
+    Pageable<IssueDTO> getRecentIssues();
 
-    Pageable<Issue> getById(List<Long> ids);
+    Pageable<IssueDTO> getById(List<Long> ids);
 
 }

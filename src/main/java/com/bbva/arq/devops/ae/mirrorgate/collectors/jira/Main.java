@@ -18,8 +18,8 @@ package com.bbva.arq.devops.ae.mirrorgate.collectors.jira;
 
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.api.CollectorService;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.api.SprintService;
-import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.model.Issue;
-import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.model.Sprint;
+import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
+import com.bbva.arq.devops.ae.mirrorgate.core.dto.SprintDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service.IssuesService;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Pageable;
 import org.slf4j.Logger;
@@ -52,8 +52,8 @@ public class Main implements Runnable {
     private IssuesService service;
 
 
-    private void iterateAndSave(Pageable<Issue> pagedIssues, boolean updateCollectorsDate) {
-        List<Issue> issues;
+    private void iterateAndSave(Pageable<IssueDTO> pagedIssues, boolean updateCollectorsDate) {
+        List<IssueDTO> issues;
 
         while ((issues = pagedIssues.nextPage()).size() > 0) {
             LOGGER.info("-> Saving: " + issues);
@@ -64,27 +64,27 @@ public class Main implements Runnable {
         }
     }
 
-    private List<Sprint> getSprintsThatNeedUpdating() {
-        final List<Sprint> sprints = sprintApi.getSprintSamples();
+    private List<SprintDTO> getSprintsThatNeedUpdating() {
+        final List<SprintDTO> sprints = sprintApi.getSprintSamples();
 
         final List<Long> ids = new ArrayList<>();
-        final Map<Long, Sprint> idToSprint = new HashMap<>(ids.size() * 2);
+        final Map<Long, SprintDTO> idToSprint = new HashMap<>(ids.size() * 2);
 
         sprints.forEach((s) -> {
-            for (Issue issue : s.getIssues()) {
+            for (IssueDTO issue : s.getIssues()) {
                 idToSprint.put(issue.getId(), s);
                 ids.add(issue.getId());
             }
         });
 
-        Pageable<Issue> samples = service.getById(ids);
+        Pageable<IssueDTO> samples = service.getById(ids);
 
-        List<Sprint> toUpdate = new ArrayList<>();
-        List<Issue> issues;
+        List<SprintDTO> toUpdate = new ArrayList<>();
+        List<IssueDTO> issues;
         while ((issues = samples.nextPage()).size() > 0) {
             LOGGER.info("-> Checking " + issues.get(0));
             issues.forEach((i) -> {
-                Sprint current = i.getSprint();
+                SprintDTO current = i.getSprint();
                 if(current == null || !current.equals(idToSprint.get(i.getId()))) {
                     toUpdate.add(i.getSprint());
                 }
@@ -100,10 +100,10 @@ public class Main implements Runnable {
         LOGGER.info("Starting");
         iterateAndSave(service.getRecentIssues(), true);
 
-        for(Sprint s : getSprintsThatNeedUpdating()) {
-            Sprint sprint = sprintApi.getSprint(s.getId());
+        for(SprintDTO s : getSprintsThatNeedUpdating()) {
+            SprintDTO sprint = sprintApi.getSprint(s.getId());
             if(sprint != null && sprint.getIssues() != null) {
-                List<Long> ids = sprint.getIssues().stream().map(Issue::getId).collect(Collectors.toList());
+                List<Long> ids = sprint.getIssues().stream().map(IssueDTO::getId).collect(Collectors.toList());
                 iterateAndSave(service.getById(ids), false);
             } else {
                 LOGGER.warn("-> Could not update the sprint " + s.getName());

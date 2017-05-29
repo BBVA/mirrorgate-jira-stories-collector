@@ -21,7 +21,7 @@ package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service;
  */
 
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config;
-import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.model.IssueStatus;
+import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssueStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;

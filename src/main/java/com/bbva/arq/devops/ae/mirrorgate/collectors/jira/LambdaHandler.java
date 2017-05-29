@@ -19,15 +19,22 @@ package com.bbva.arq.devops.ae.mirrorgate.collectors.jira;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import org.springframework.boot.SpringApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 
 public class LambdaHandler implements RequestHandler<Object, String> {
 
+    private static ConfigurableApplicationContext ctx;
+
+    private static synchronized ConfigurableApplicationContext getContext() {
+        if(ctx == null) {
+            ctx = SpringApplication.run(MirrorgateJiraStoriesCollectorApplication.class);
+        }
+        return ctx;
+    }
+
     @Override
     public String handleRequest(Object input, Context context) {
-
-        SpringApplication.run(MirrorgateJiraStoriesCollectorApplication.class)
-                .getBean(Main.class).run();
-
+        getContext().getBean(Main.class).run();
         return null;
     }
 }

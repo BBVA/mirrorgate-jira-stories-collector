@@ -16,8 +16,8 @@
 
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira;
 
-import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.model.Sprint;
-import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.model.SprintStatus;
+import com.bbva.arq.devops.ae.mirrorgate.core.dto.SprintDTO;
+import com.bbva.arq.devops.ae.mirrorgate.core.utils.SprintStatus;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueUtils;
 import org.joda.time.DateTime;
 import org.junit.Test;
@@ -43,7 +43,7 @@ public class SprintParserTests {
     @Test
     public void itShouldParseSprintsCorrectly() {
         String in = "com.atlassian.greenhopper.service.sprint.Sprint@20d5ab81[id=1003,rapidViewId=879,state=CLOSED,name=SOME_SPRINT,startDate=2017-02-22T07:00:27.314+01:00,endDate=2017-03-07T19:00:00.000+01:00,completeDate=2017-03-08T10:29:26.122+01:00,sequence=1003]";
-        Sprint out = issueUtils.parseSprint(in);
+        SprintDTO out = issueUtils.parseSprint(in);
 
         assertEquals(out.getId(), "1003");
         assertEquals(out.getStatus(), SprintStatus.CLOSED);
@@ -57,7 +57,7 @@ public class SprintParserTests {
     @Test
     public void itShouldNotFailWhenMissingFields() {
         String in = "com.atlassian.greenhopper.service.sprint.Sprint@20d5ab81[id=1003]";
-        Sprint out = issueUtils.parseSprint(in);
+        SprintDTO out = issueUtils.parseSprint(in);
 
         assertEquals(out.getId(), "1003");
         assertEquals(out.getStatus(), null);
@@ -71,7 +71,7 @@ public class SprintParserTests {
     @Test
     public void itShouldNotResturnSprintWhenDoesntMatch() {
         String in = "someother.class@20d5ab81[id=1003]";
-        Sprint out = issueUtils.parseSprint(in);
+        SprintDTO out = issueUtils.parseSprint(in);
 
         assertEquals(out, null);
 

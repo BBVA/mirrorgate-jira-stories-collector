@@ -19,8 +19,8 @@ package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service;
 import com.atlassian.jira.rest.client.api.SearchRestClient;
 import com.atlassian.jira.rest.client.api.domain.SearchResult;
 import com.atlassian.util.concurrent.Promise;
-import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.model.Issue;
-import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.model.Project;
+import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
+import com.bbva.arq.devops.ae.mirrorgate.core.dto.ProjectDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Counter;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueFields;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueUtils;
@@ -70,7 +70,7 @@ public class JiraIssuesServiceImpl implements IssuesService {
     }
 
     @Override
-    public Pageable<Issue> getRecentIssues() {
+    public Pageable<IssueDTO> getRecentIssues() {
         final Counter page = new Counter(PAGE_SIZE);
 
         String query = String.format(ISSUES_QUERY_PATTERN,
@@ -86,7 +86,7 @@ public class JiraIssuesServiceImpl implements IssuesService {
         });
     }
 
-    public Pageable<Issue> getById(List<Long> ids) {
+    public Pageable<IssueDTO> getById(List<Long> ids) {
         final StringBuilder sb = new StringBuilder(200);
         final Counter counter = new Counter();
 
@@ -113,9 +113,9 @@ public class JiraIssuesServiceImpl implements IssuesService {
 
     }
 
-    private Function<com.atlassian.jira.rest.client.api.domain.Issue, Issue> getIssueMapper() {
+    private Function<com.atlassian.jira.rest.client.api.domain.Issue, IssueDTO> getIssueMapper() {
         return (issue) ->
-                new Issue()
+                new IssueDTO()
                         .setId(issue.getId())
                         .setName(issue.getSummary())
                         .setEstimate(utils.getField(issue, JiraIssueFields.STORY_POINTS, Double.class).get())
@@ -125,7 +125,7 @@ public class JiraIssuesServiceImpl implements IssuesService {
                         .setType(issue.getIssueType().getName())
                         .setUpdatedDate(issue.getUpdateDate().toDate())
                         .setProject(issue.getProject() == null ? null :
-                                new Project()
+                                new ProjectDTO()
                                         .setId(issue.getProject().getId())
                                         .setName(issue.getProject().getName())
                                         .setKey(issue.getProject().getKey())
