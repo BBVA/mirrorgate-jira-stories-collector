@@ -33,18 +33,25 @@ node('global') {
             """
         }
 
-        /*stage('Docker - push') {
-            if(env.BRANCH_NAME == 'master') {
+        stage('Docker - push') {
+            withCredentials([[$class : 'UsernamePasswordMultiBinding',
+                              credentialsId   : "bot-mirrorgate-dh  ",
+                              usernameVariable: 'DOCKER_USER',
+                              passwordVariable: 'DOCKER_PASSWORD']]) {
+                if (env.BRANCH_NAME == 'master') {
+                    sh """
+                        docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
+                        docker tag bbvaae/mirrorgate-jira-stories-collector bbvaae/mirrorgate-jira-stories-collector:release
+                        docker push bbvaae/mirrorgate-jira-stories-collector:release
+                    """
+                }
                 sh """
-                    docker tag bbvaae/mirrorgate-jira-stories-collector bbvaae/mirrorgate-jira-stories-collector:release
-                    docker push bbvaae/mirrorgate-jira-stories-collector:release
+                    docker login --username $DOCKER_USER --password $DOCKER_PASSWORD
+                    docker tag bbvaae/mirrorgate-jira-stories-collector bbvaae/mirrorgate-jira-stories-collector:latest
+                    docker push bbvaae/mirrorgate-jira-stories-collector:latest
                 """
             }
-            sh """
-                docker tag bbvaae/mirrorgate-jira-stories-collector bbvaae/mirrorgate-jira-stories-collector:latest
-                docker push bbvaae/mirrorgate-jira-stories-collector:latest
-            """
-        }*/
+        }
     }
 
 }
