@@ -39,6 +39,7 @@ public class SprintService {
     private String mirrorGateUrl;
 
     private static final String MIRROR_GATE_SEND_ISSUES_ENDPOINT="/api/issues";
+    private static final String MIRROR_GATE_HANDLE_ISSUE_ENDPOINT ="/api/issues/{id}";
     private static final String MIRROR_GATE_GET_SPRINT_SAMPLE_ENDPOINT="/api/sprints/changing-sample";
     private static final String MIRROR_GATE_GET_SPRINT_ISSUES_ENDPOINT="/api/sprints/{id}";
 
@@ -48,6 +49,10 @@ public class SprintService {
 
     public ResponseEntity<List> sendIssues(List<IssueDTO> issues) {
         return restTemplate.postForEntity(mirrorGateUrl + MIRROR_GATE_SEND_ISSUES_ENDPOINT, issues, List.class);
+    }
+
+    public void deleteIssue(Long issueId) {
+        restTemplate.delete(mirrorGateUrl + MIRROR_GATE_HANDLE_ISSUE_ENDPOINT, issueId);
     }
 
     public List<SprintDTO> getSprintSamples() {

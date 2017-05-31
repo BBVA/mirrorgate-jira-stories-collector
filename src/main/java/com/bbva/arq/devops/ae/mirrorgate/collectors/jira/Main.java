@@ -28,10 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -64,6 +61,21 @@ public class Main implements Runnable {
         }
     }
 
+    private Pageable<IssueDTO> getIssuesByIdAndDeleteNotPresent(List<Long> ids) {
+        final Set<Long> idSet = new HashSet<>(ids);
+        final Pageable<IssueDTO> wrapped = service.getById(ids);
+        return () -> {
+            List<IssueDTO> result = wrapped.nextPage();
+            for (IssueDTO issueDTO : result) {
+                idSet.remove(issueDTO.getId());
+            }
+            if(result.size() == 0) {
+                idSet.stream().forEach((i) -> sprintApi.deleteIssue(i));
+            }
+            return result;
+        };
+    }
+
     private List<SprintDTO> getSprintsThatNeedUpdating() {
         final List<SprintDTO> sprints = sprintApi.getSprintSamples();
 
@@ -77,7 +89,7 @@ public class Main implements Runnable {
             }
         });
 
-        Pageable<IssueDTO> samples = service.getById(ids);
+        Pageable<IssueDTO> samples = getIssuesByIdAndDeleteNotPresent(ids);
 
         List<SprintDTO> toUpdate = new ArrayList<>();
         List<IssueDTO> issues;
@@ -85,7 +97,9 @@ public class Main implements Runnable {
             LOGGER.info("-> Checking " + issues.get(0));
             issues.forEach((i) -> {
                 SprintDTO current = i.getSprint();
-                if(current == null || !current.equals(idToSprint.get(i.getId()))) {
+                if(current == null) {
+                    toUpdate.add(idToSprint.get(i.getId()));
+                } else if(!current.equals(idToSprint.get(i.getId()))) {
                     toUpdate.add(i.getSprint());
                 }
             });
@@ -104,7 +118,7 @@ public class Main implements Runnable {
             SprintDTO sprint = sprintApi.getSprint(s.getId());
             if(sprint != null && sprint.getIssues() != null) {
                 List<Long> ids = sprint.getIssues().stream().map(IssueDTO::getId).collect(Collectors.toList());
-                iterateAndSave(service.getById(ids), false);
+                iterateAndSave(getIssuesByIdAndDeleteNotPresent(ids), false);
             } else {
                 LOGGER.warn("-> Could not update the sprint " + s.getName());
             }

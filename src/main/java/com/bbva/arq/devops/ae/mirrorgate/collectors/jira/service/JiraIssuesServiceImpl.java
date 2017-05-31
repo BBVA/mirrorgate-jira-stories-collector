@@ -16,7 +16,9 @@
 
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service;
 
+import com.atlassian.jira.rest.client.api.RestClientException;
 import com.atlassian.jira.rest.client.api.SearchRestClient;
+import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.SearchResult;
 import com.atlassian.util.concurrent.Promise;
 import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
@@ -32,7 +34,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Spliterator;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -91,6 +95,7 @@ public class JiraIssuesServiceImpl implements IssuesService {
         final Counter counter = new Counter();
 
         return (() -> {
+            int firstItem = counter.get();
             if(counter.get() >= ids.size()) {
                 return new ArrayList<>();
             }
@@ -98,17 +103,40 @@ public class JiraIssuesServiceImpl implements IssuesService {
                 if(i > 0) {
                     sb.append(',');
                 }
-                sb.append(ids.get(i));
+                sb.append(ids.get(counter.get()));
             }
             String query = String.format(ISSUES_BY_ID_QUERY_PATTERN, sb.toString());
             sb.delete(0,sb.length());
 
             LOGGER.info("-> Running Jira Query: " + query);
-
-            Promise<SearchResult> results = client.searchJql(query);
-
-            return StreamSupport.stream(results.claim().getIssues().spliterator(),false)
-                    .map(getIssueMapper()).collect(Collectors.toList());
+            try {
+                Promise<SearchResult> results = client.searchJql(query);
+                return StreamSupport.stream(results.claim().getIssues().spliterator(),false)
+                        .map(getIssueMapper()).collect(Collectors.toList());
+            }  catch (RestClientException e) {
+                LOGGER.warn("Exception", e);
+                int statusCode = e.getStatusCode().isPresent() ? e.getStatusCode().get() : 0;
+                if (statusCode == 401 ) {
+                    LOGGER.error("Error 401 connecting to JIRA server, your credentials are probably wrong. Note: Ensure you are using JIRA user name not your email address.");
+                    throw e;
+                } else if(statusCode == 400) {
+                    if(ids.size() == 1) {
+                        return new ArrayList<>();
+                    } else {
+                        LOGGER.warn("Error 400 - Some issues where not found {}, keep on", ids);
+                        LOGGER.warn(e.getMessage());
+                        //Falling back to per issue invocation if one was not found... Why Jira o why...
+                        List<IssueDTO> result = new ArrayList<>(PAGE_SIZE);
+                        for (int i = firstItem; i < counter.get(); i++) {
+                            result.addAll(getById(Arrays.asList(ids.get(i))).nextPage());
+                        }
+                        return result;
+                    }
+                } else {
+                    LOGGER.error("No result was available from Jira unexpectedly - defaulting to blank response. The reason for this fault is the following:" + e.getCause());
+                    throw e;
+                }
+            }
         });
 
     }
