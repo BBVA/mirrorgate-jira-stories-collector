@@ -18,28 +18,25 @@ package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service;
 
 import com.atlassian.jira.rest.client.api.RestClientException;
 import com.atlassian.jira.rest.client.api.SearchRestClient;
-import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.SearchResult;
 import com.atlassian.util.concurrent.Promise;
-import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
-import com.bbva.arq.devops.ae.mirrorgate.core.dto.ProjectDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Counter;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueFields;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueUtils;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Pageable;
+import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
+import com.bbva.arq.devops.ae.mirrorgate.core.dto.ProjectDTO;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Spliterator;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * Created by alfonso on 26/05/17.
@@ -108,7 +105,7 @@ public class JiraIssuesServiceImpl implements IssuesService {
             String query = String.format(ISSUES_BY_ID_QUERY_PATTERN, sb.toString());
             sb.delete(0,sb.length());
 
-            LOGGER.info("-> Running Jira Query: " + query);
+            LOGGER.info("-> Running Jira Query: {}", query);
             try {
                 Promise<SearchResult> results = client.searchJql(query);
                 return StreamSupport.stream(results.claim().getIssues().spliterator(),false)
@@ -142,10 +139,15 @@ public class JiraIssuesServiceImpl implements IssuesService {
     }
 
     private Function<com.atlassian.jira.rest.client.api.domain.Issue, IssueDTO> getIssueMapper() {
-        return (issue) ->
+        return issue ->
                 new IssueDTO()
                         .setId(issue.getId())
                         .setName(issue.getSummary())
+                        .setJiraKey(issue.getKey())
+                        .setPiNames(utils.objectToStringList(utils.getField(issue, JiraIssueFields.PI, List.class).get()))
+                        .setParentKey(utils.getParentIssueKey(issue))
+                        .setParentId(utils.getParentIssueId(issue))
+                    //Why create JiraIssueFields with an attached class type when we have to pass it in this method?
                         .setEstimate(utils.getField(issue, JiraIssueFields.STORY_POINTS, Double.class).get())
                         .setType(issue.getIssueType().getName())
                         .setStatus(statusMapService.getStatusMappings().get(issue.getStatus().getName()))

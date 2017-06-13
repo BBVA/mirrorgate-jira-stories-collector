@@ -53,7 +53,7 @@ public class Main implements Runnable {
         List<IssueDTO> issues;
 
         while ((issues = pagedIssues.nextPage()).size() > 0) {
-            LOGGER.info("-> Saving: " + issues);
+            LOGGER.info("-> Saving: {}", issues);
             sprintApi.sendIssues(issues);
             if(updateCollectorsDate) {
                 collectorApi.update(issues.get(issues.size() - 1).getUpdatedDate());
@@ -94,7 +94,7 @@ public class Main implements Runnable {
         List<SprintDTO> toUpdate = new ArrayList<>();
         List<IssueDTO> issues;
         while ((issues = samples.nextPage()).size() > 0) {
-            LOGGER.info("-> Checking " + issues.get(0));
+            LOGGER.info("-> Checking {}", issues.get(0));
             issues.forEach((i) -> {
                 SprintDTO current = i.getSprint();
                 if(current == null) {
@@ -104,7 +104,7 @@ public class Main implements Runnable {
                 }
             });
         }
-        LOGGER.info("-> Needs updating: " + toUpdate);
+        LOGGER.info("-> Needs updating: {}", toUpdate);
         return toUpdate;
     }
 
@@ -120,7 +120,7 @@ public class Main implements Runnable {
                 List<Long> ids = sprint.getIssues().stream().map(IssueDTO::getId).collect(Collectors.toList());
                 iterateAndSave(getIssuesByIdAndDeleteNotPresent(ids), false);
             } else {
-                LOGGER.warn("-> Could not update the sprint " + s.getName());
+                LOGGER.warn("-> Could not update the sprint {}", s.getName());
             }
         }
 

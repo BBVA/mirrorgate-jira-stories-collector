@@ -18,9 +18,14 @@ package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support;
 
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.IssueField;
+import com.atlassian.jira.rest.client.api.domain.IssueLink;
+import com.atlassian.jira.rest.client.api.domain.IssueLinkType.Direction;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.FieldsConfig;
 import com.bbva.arq.devops.ae.mirrorgate.core.dto.SprintDTO;
 import com.bbva.arq.devops.ae.mirrorgate.core.utils.SprintStatus;
+import java.lang.reflect.Array;
+import java.net.URI;
+import java.util.stream.StreamSupport;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -100,29 +105,37 @@ public class JiraIssueUtils {
         return null;
     }
 
-    public SprintDTO getPriorSprint(Object o) {
+    public List<String> objectToStringList(Object o){
         if(o == null) {
             return null;
         }
 
-        List<String> sprints = null;
+        List<String> stringList = null;
 
         if(o instanceof JSONArray) {
             JSONArray array = (JSONArray) o;
-            sprints = new ArrayList<>(array.length());
+            stringList = new ArrayList<>(array.length());
 
             for (int i = 0; i < array.length(); i++) {
                 try {
-                    sprints.add((String) array.get(i));
+                    stringList.add((String) array.get(i));
                 } catch (JSONException e) {
                     LOGGER.error("Error parsing sprint field", e);
                 }
             }
         } else if(o instanceof List) {
-            sprints = (List<String>) o;
+            stringList = (List<String>) o;
         }
 
-        return getPriorSprint(sprints);
+        return stringList;
+    }
+
+    public SprintDTO getPriorSprint(Object o) {
+        if(o == null) {
+            return null;
+        }
+
+        return getPriorSprint(objectToStringList(o));
     }
 
     public SprintDTO getPriorSprint(List<String> data) {
@@ -191,6 +204,38 @@ public class JiraIssueUtils {
                 .collect(Collectors.toList()));
 
         return keywords;
+    }
+
+    public String getParentIssueKey(Issue issue){
+        Optional<IssueLink> issueLink = getInboundLinks(issue);
+
+        String parentKey = null;
+        if(issueLink.isPresent()){
+            parentKey = issueLink.map(IssueLink::getTargetIssueKey).get();
+        }
+        return parentKey;
+    }
+
+    public String getParentIssueId(Issue issue){
+        Optional<IssueLink> issueLink = getInboundLinks(issue);
+
+        Optional<URI> uri = issueLink.map(IssueLink::getTargetIssueUri);
+
+        String parentIssueId = null;
+        if(uri.isPresent()){
+            String[] pathParts = uri.get().getPath().split("/");
+            parentIssueId = pathParts[pathParts.length-1];
+        }
+
+        return parentIssueId;
+    }
+
+    private Optional<IssueLink> getInboundLinks(Issue issue){
+
+        return StreamSupport
+            .stream(issue.getIssueLinks().spliterator(), false)
+            .filter(i -> i.getIssueLinkType().getDirection().equals(Direction.INBOUND))
+            .findFirst();
     }
 
 }
