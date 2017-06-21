@@ -21,25 +21,24 @@ import com.atlassian.jira.rest.client.api.SearchRestClient;
 import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.atlassian.jira.rest.client.api.domain.SearchResult;
 import com.atlassian.util.concurrent.Promise;
-import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
-import com.bbva.arq.devops.ae.mirrorgate.core.dto.ProjectDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Counter;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueFields;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueUtils;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Pageable;
+import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
+import com.bbva.arq.devops.ae.mirrorgate.core.dto.ProjectDTO;
+import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssuePriority;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Spliterator;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * Created by alfonso on 26/05/17.
@@ -149,6 +148,7 @@ public class JiraIssuesServiceImpl implements IssuesService {
                         .setEstimate(utils.getField(issue, JiraIssueFields.STORY_POINTS, Double.class).get())
                         .setType(issue.getIssueType().getName())
                         .setStatus(statusMapService.getStatusMappings().get(issue.getStatus().getName()))
+                        .setPriority(IssuePriority.fromName(issue.getPriority().getName()))
                         .setSprint(utils.getPriorSprint(utils.getField(issue, JiraIssueFields.SPRINT).get()))
                         .setType(issue.getIssueType().getName())
                         .setUpdatedDate(issue.getUpdateDate().toDate())
