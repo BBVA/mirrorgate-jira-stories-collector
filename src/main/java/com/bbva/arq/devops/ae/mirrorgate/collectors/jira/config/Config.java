@@ -29,6 +29,7 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
+import java.util.TimeZone;
 
 /**
  * Created by alfonso on 26/05/17.
@@ -56,6 +57,9 @@ public class Config {
 
     @Value("${mirrorgate.password:}")
     private Optional<String> mirrorGatePassword;
+
+    @Value("${jira.timezone:}")
+    private Optional<String> jiraTimeZone;
 
     @Bean
     public synchronized JiraRestClient getJiraRestClient() {
@@ -105,5 +109,15 @@ public class Config {
         restTemplate.getInterceptors().add(
                 new BasicAuthorizationInterceptor(jiraUserName, jiraPassword));
         return restTemplate;
+    }
+
+    @Bean
+    public TimeZone getTimeZone() {
+        TimeZone tz = TimeZone.getDefault();
+        if(jiraTimeZone.isPresent() && jiraTimeZone.get().length() > 0) {
+            tz = TimeZone.getTimeZone(jiraTimeZone.get());
+        }
+
+        return tz;
     }
 }
