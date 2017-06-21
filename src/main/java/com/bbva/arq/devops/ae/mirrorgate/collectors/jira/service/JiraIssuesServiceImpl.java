@@ -99,6 +99,7 @@ public class JiraIssuesServiceImpl implements IssuesService {
         });
     }
 
+    @Override
     public Pageable<IssueDTO> getById(List<Long> ids) {
         final StringBuilder sb = new StringBuilder(200);
         final Counter counter = new Counter();
