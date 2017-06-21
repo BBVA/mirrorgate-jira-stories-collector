@@ -80,6 +80,8 @@ public class JiraIssuesServiceImpl implements IssuesService {
                 collectorStatusService.getLastExecutionDate().toString("yyyy-MM-dd HH:mm"),
                 issueTypes);
 
+        LOGGER.info("-> Running Jira Query: " + query);
+
         return (() -> {
 
             Promise<SearchResult> results = client.searchJql(query,PAGE_SIZE,page.inc(),null);
