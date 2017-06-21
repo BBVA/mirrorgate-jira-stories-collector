@@ -86,7 +86,7 @@ public class JiraIssuesServiceImpl implements IssuesService {
                 date,
                 issueTypes);
 
-        LOGGER.info("-> Running Jira Query: " + query);
+        LOGGER.info("-> Running Jira Query: {}", query);
 
         return (() -> {
 
@@ -115,7 +115,7 @@ public class JiraIssuesServiceImpl implements IssuesService {
             String query = String.format(ISSUES_BY_ID_QUERY_PATTERN, sb.toString());
             sb.delete(0,sb.length());
 
-            LOGGER.info("-> Running Jira Query: " + query);
+            LOGGER.info("-> Running Jira Query: {}", query);
             try {
                 Promise<SearchResult> results = client.searchJql(query);
                 return StreamSupport.stream(results.claim().getIssues().spliterator(),false)
