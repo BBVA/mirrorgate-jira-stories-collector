@@ -26,6 +26,8 @@ public class JiraIssueFields<T> {
     public static final JiraIssueFields STORY_POINTS = new JiraIssueFields(Double.class);
     public static final JiraIssueFields SPRINT = new JiraIssueFields(List.class);
     public static final JiraIssueFields KEYWORDS = new JiraIssueFields(String.class);
+    //Can a feature be part of multiple PIs?
+    public static final JiraIssueFields PI = new JiraIssueFields(List.class);
 
     public Class<T> type;
 

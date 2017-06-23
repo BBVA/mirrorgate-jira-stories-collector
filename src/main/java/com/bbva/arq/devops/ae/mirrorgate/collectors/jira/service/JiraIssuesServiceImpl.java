@@ -152,10 +152,15 @@ public class JiraIssuesServiceImpl implements IssuesService {
     }
 
     private Function<com.atlassian.jira.rest.client.api.domain.Issue, IssueDTO> getIssueMapper() {
-        return (issue) ->
+        return issue ->
                 new IssueDTO()
                         .setId(issue.getId())
                         .setName(issue.getSummary())
+                        .setJiraKey(issue.getKey())
+                        .setPiNames(utils.objectToStringList(utils.getField(issue, JiraIssueFields.PI, List.class).get()))
+                        .setParentKey(utils.getParentIssueKey(issue))
+                        .setParentId(utils.getParentIssueId(issue))
+                    //Why create JiraIssueFields with an attached class type when we have to pass it in this method?
                         .setEstimate(utils.getField(issue, JiraIssueFields.STORY_POINTS, Double.class).get())
                         .setType(issue.getIssueType().getName())
                         .setStatus(statusMapService.getStatusMappings().get(issue.getStatus().getName()))

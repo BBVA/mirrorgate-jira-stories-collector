@@ -46,6 +46,9 @@ public class FieldsConfig {
     @Value("${jira.fields.keywordList}")
     private String keywordsList;
 
+    @Value("${jira.fields.pi}")
+    private String piField;
+
     @Bean(JIRA_FIELDS_BEAN)
     public Map<JiraIssueFields, String> getFieldIds() {
         Map<JiraIssueFields, String> fields = new HashMap<>();
@@ -53,15 +56,16 @@ public class FieldsConfig {
         fields.put(JiraIssueFields.STORY_POINTS, storyPointsField);
         fields.put(JiraIssueFields.SPRINT, sprintField);
         fields.put(JiraIssueFields.KEYWORDS, keywordsList);
+        fields.put(JiraIssueFields.PI, piField);
 
         return fields;
     }
 
     @Bean(KEYWORDS_FIELD_BEAN)
     public List<String> getKeywordsFields() {
-        return Arrays.asList(getFieldIds().get(JiraIssueFields.KEYWORDS).split(",")).stream()
+        return Arrays.stream(getFieldIds().get(JiraIssueFields.KEYWORDS).split(","))
                 .map(String::trim)
-                .filter((s) -> s.length() > 0)
+                .filter(s -> s.length() > 0)
                 .collect(Collectors.toList());
     }
 
