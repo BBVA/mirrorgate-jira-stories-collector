@@ -26,12 +26,15 @@ import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueUtils;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Pageable;
 import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
 import com.bbva.arq.devops.ae.mirrorgate.core.dto.ProjectDTO;
+import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssuePriority;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,26 +60,35 @@ public class JiraIssuesServiceImpl implements IssuesService {
     private CollectorStatusService collectorStatusService;
     private StatusMapService statusMapService;
     private JiraIssueUtils utils;
+    private final TimeZone jiraTimeZone;
 
     @Autowired
     public JiraIssuesServiceImpl(SearchRestClient jiraRestClient,
                                  CollectorStatusService collectorStatusService,
                                  StatusMapService statusMapService,
-                                 JiraIssueUtils jiraIssueUtils
+                                 JiraIssueUtils jiraIssueUtils,
+                                 TimeZone jiraTimeZone
     ) {
         this.client = jiraRestClient;
         this.collectorStatusService = collectorStatusService;
         this.statusMapService = statusMapService;
         this.utils = jiraIssueUtils;
+        this.jiraTimeZone = jiraTimeZone;
     }
 
     @Override
     public Pageable<IssueDTO> getRecentIssues() {
         final Counter page = new Counter(PAGE_SIZE);
 
+        String date =
+                collectorStatusService.getLastExecutionDate()
+                        .toDateTime(DateTimeZone.forTimeZone(jiraTimeZone))
+                        .toString("yyyy-MM-dd HH:mm");
         String query = String.format(ISSUES_QUERY_PATTERN,
-                collectorStatusService.getLastExecutionDate().toString("yyyy-MM-dd HH:mm"),
+                date,
                 issueTypes);
+
+        LOGGER.info("-> Running Jira Query: {}", query);
 
         return (() -> {
 
@@ -87,6 +99,7 @@ public class JiraIssuesServiceImpl implements IssuesService {
         });
     }
 
+    @Override
     public Pageable<IssueDTO> getById(List<Long> ids) {
         final StringBuilder sb = new StringBuilder(200);
         final Counter counter = new Counter();
@@ -151,6 +164,7 @@ public class JiraIssuesServiceImpl implements IssuesService {
                         .setEstimate(utils.getField(issue, JiraIssueFields.STORY_POINTS, Double.class).get())
                         .setType(issue.getIssueType().getName())
                         .setStatus(statusMapService.getStatusMappings().get(issue.getStatus().getName()))
+                        .setPriority(IssuePriority.fromName(issue.getPriority().getName()))
                         .setSprint(utils.getPriorSprint(utils.getField(issue, JiraIssueFields.SPRINT).get()))
                         .setType(issue.getIssueType().getName())
                         .setUpdatedDate(issue.getUpdateDate().toDate())

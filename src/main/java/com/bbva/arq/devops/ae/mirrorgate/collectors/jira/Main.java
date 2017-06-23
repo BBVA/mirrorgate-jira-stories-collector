@@ -98,8 +98,11 @@ public class Main implements Runnable {
             issues.forEach((i) -> {
                 SprintDTO current = i.getSprint();
                 if(current == null) {
-                    toUpdate.add(idToSprint.get(i.getId()));
+                    current = idToSprint.get(i.getId());
+                    LOGGER.info("-> New Sprint {} asociation for issue {}", current.getName(), i.getId());
+                    toUpdate.add(current);
                 } else if(!current.equals(idToSprint.get(i.getId()))) {
+                    LOGGER.info("-> Sprint changed {} for issue {}", current.getName(), i.getId());
                     toUpdate.add(i.getSprint());
                 }
             });
