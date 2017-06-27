@@ -103,7 +103,8 @@ public class Main implements Runnable {
                     toUpdate.add(current);
                 } else if(!current.equals(idToSprint.get(i.getId()))) {
                     LOGGER.info("-> Sprint changed {} for issue {}", current.getName(), i.getId());
-                    toUpdate.add(i.getSprint());
+                    toUpdate.add(current);
+                    toUpdate.add(idToSprint.get(i.getId()));
                 }
             });
         }
