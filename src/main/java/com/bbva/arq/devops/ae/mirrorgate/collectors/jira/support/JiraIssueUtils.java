@@ -72,6 +72,22 @@ public class JiraIssueUtils {
 
     }
 
+    private static class SprintDateComparator implements Comparator<SprintDTO> {
+
+        @Override
+        public int compare(SprintDTO o1, SprintDTO o2) {
+            if(o1.getStatus() != o2.getStatus()) {
+                if (o1.getStatus() == SprintStatus.ACTIVE) {
+                    return -1;
+                } else if (o2.getStatus() == SprintStatus.ACTIVE) {
+                    return 1;
+                }
+            }
+            return o1.getEndDate() != null ? o1.getEndDate().compareTo(o2.getEndDate()) : 1;
+        }
+
+    }
+
     public static Object getFieldValue(Issue issue, String field) {
         Object out = null;
         IssueField iField = issue.getField(field);
@@ -140,9 +156,12 @@ public class JiraIssueUtils {
 
     public SprintDTO getPriorSprint(List<String> data) {
         List<SprintDTO> sprints = getSprintList(data);
-        return sprints == null || sprints.size() == 0?
-                null:
-                sprints.get(0);
+        SprintDTO latest = null;
+        if(sprints != null && sprints.size() > 0) {
+            sprints.sort(new SprintDateComparator());
+            latest = sprints.get(0);
+        }
+        return latest;
     }
 
     public List<SprintDTO> getSprintList(List<String> data) {
