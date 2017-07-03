@@ -19,6 +19,8 @@ package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.api;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config;
 import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
 import com.bbva.arq.devops.ae.mirrorgate.core.dto.SprintDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +39,8 @@ import java.util.List;
  */
 @Component
 public class SprintService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SprintService.class);
 
     @Value("${mirrorgate.url}")
     private String mirrorGateUrl;
@@ -66,7 +70,7 @@ public class SprintService {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
         params.set("collectorId", collectorId);
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRROR_GATE_SEND_ISSUES_ENDPOINT).queryParams(params);
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRROR_GATE_HANDLE_ISSUE_ENDPOINT).queryParams(params);
 
         restTemplate.delete(builder.toUriString(), issueId);
     }
@@ -76,7 +80,12 @@ public class SprintService {
     }
 
     public SprintDTO getSprint(String name) {
-        return restTemplate.getForObject(mirrorGateUrl + MIRROR_GATE_GET_SPRINT_ISSUES_ENDPOINT, SprintDTO.class, name);
+        try{
+            return restTemplate.getForObject(mirrorGateUrl + MIRROR_GATE_GET_SPRINT_ISSUES_ENDPOINT, SprintDTO.class, name);
+        }catch(Exception e){
+            LOGGER.warn("Error getting sprint {}", name, e);
+            return null;
+        }
     }
 
 }
