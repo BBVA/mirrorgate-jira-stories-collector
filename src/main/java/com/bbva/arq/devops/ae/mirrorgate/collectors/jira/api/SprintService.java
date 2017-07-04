@@ -76,12 +76,22 @@ public class SprintService {
     }
 
     public List<SprintDTO> getSprintSamples() {
-        return Arrays.asList(restTemplate.getForObject(mirrorGateUrl + MIRROR_GATE_GET_SPRINT_SAMPLE_ENDPOINT,SprintDTO[].class));
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+        params.set("collectorId", collectorId);
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRROR_GATE_GET_SPRINT_SAMPLE_ENDPOINT).queryParams(params);
+
+        return Arrays.asList(restTemplate.getForObject(builder.build().toUriString(), SprintDTO[].class));
     }
 
     public SprintDTO getSprint(String name) {
         try{
-            return restTemplate.getForObject(mirrorGateUrl + MIRROR_GATE_GET_SPRINT_ISSUES_ENDPOINT, SprintDTO.class, name);
+            MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+            params.set("collectorId", collectorId);
+
+            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRROR_GATE_GET_SPRINT_ISSUES_ENDPOINT).queryParams(params);
+
+            return restTemplate.getForObject(builder.build().toUriString(), SprintDTO.class, name);
         }catch(Exception e){
             LOGGER.warn("Error getting sprint {}", name, e);
             return null;
