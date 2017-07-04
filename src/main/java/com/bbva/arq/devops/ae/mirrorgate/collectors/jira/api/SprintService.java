@@ -63,7 +63,7 @@ public class SprintService {
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRROR_GATE_SEND_ISSUES_ENDPOINT).queryParams(params);
 
-        return restTemplate.postForEntity(builder.toUriString(), issues, List.class);
+        return restTemplate.postForEntity(builder.build().toUriString(), issues, List.class);
     }
 
     public void deleteIssue(Long issueId) {
@@ -72,7 +72,7 @@ public class SprintService {
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRROR_GATE_HANDLE_ISSUE_ENDPOINT).queryParams(params);
 
-        restTemplate.delete(builder.toUriString(), issueId);
+        restTemplate.delete(builder.build().toUriString(), issueId);
     }
 
     public List<SprintDTO> getSprintSamples() {
