@@ -45,25 +45,38 @@ public class JiraStatusMapServiceImpl implements StatusMapService {
 
     private Map<String, IssueStatus> statusCache;
 
+    //TODO: Allow configurable Mappings
     private static final Map<String, IssueStatus> STATUS_DEFAULTS = new HashMap<String, IssueStatus>(){{
         put("To Do", IssueStatus.BACKLOG);
         put("Blocked", IssueStatus.IMPEDED);
         put("In Progress", IssueStatus.IN_PROGRESS);
         put("Done", IssueStatus.DONE);
         put("Waiting", IssueStatus.WAITING);
+        put("new", IssueStatus.BACKLOG);
+        put("indeterminate", IssueStatus.IN_PROGRESS);
+        put("done", IssueStatus.DONE);
     }};
 
     private static IssueStatus getStatus(Object status) {
-        String name = getName(status);
-        if(STATUS_DEFAULTS.containsKey(name)) {
-            return STATUS_DEFAULTS.get(name);
-        } else {
-            return STATUS_DEFAULTS.get(getName(((Map) status).get("statusCategory")));
+        IssueStatus value = STATUS_DEFAULTS.get(getName(status));
+        Object category = ((Map) status).get("statusCategory");
+        if(value != null) {
+            return value;
         }
+        value = STATUS_DEFAULTS.get(getName(category));
+        if(value != null) {
+            return value;
+        }
+        value = STATUS_DEFAULTS.get(getField(category, "key"));
+        return value;
     }
 
     private static String getName(Object map) {
-        return (String)((Map) map).get("name");
+        return getField(map, "name");
+    }
+
+    private static String getField(Object map, String field) {
+        return (String)((Map) map).get(field);
     }
 
     @Autowired
