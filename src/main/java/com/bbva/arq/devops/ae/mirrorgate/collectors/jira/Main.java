@@ -48,6 +48,9 @@ public class Main implements Runnable {
     @Autowired
     private IssuesService service;
 
+    public void updateIssuesOnDemand(List<Long> ids) {
+        iterateAndSave(getIssuesByIdAndDeleteNotPresent(ids), true);
+    }
 
     private void iterateAndSave(Pageable<IssueDTO> pagedIssues, boolean updateCollectorsDate) {
         List<IssueDTO> issues;
