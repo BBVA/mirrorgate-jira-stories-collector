@@ -39,6 +39,7 @@ dependencies {
 	compile('org.springframework:spring-web')
 	compile('com.bbva.arq.devops.ae.mirrorgate:mirrorgate-core:0.0.1-SNAPSHOT')
 	compile('org.hibernate:hibernate-validator:5.3.5.Final')
+    compile("org.springframework.boot:spring-boot-starter-actuator")
 
 	compile (
 			'com.amazonaws:aws-lambda-java-core:1.1.0',
