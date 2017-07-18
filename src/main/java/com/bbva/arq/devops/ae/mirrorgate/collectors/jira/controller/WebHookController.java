@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * Created by alfonso on 13/07/17.
@@ -36,11 +37,39 @@ import java.util.Arrays;
 @RequestMapping("/webhook")
 public class WebHookController {
 
+    private enum JiraEvent {
+
+        IssueCreated ("jira:issue_created"),
+        IssueUpdated ("jira:issue_updated"),
+        IssueDeleted ("jira:issue_deleted"),
+        SprintCreated ("sprint_created"),
+        SprintUpdated ("sprint_updated"),
+        SprintDeleted ("sprint_deleted"),
+        SprintOpened ("sprint_opened"),
+        SprintClosed ("sprint_closed"),
+        Unknown ("?"),
+        ;
+
+
+        private String name;
+
+        JiraEvent(String name) {
+            this.name = name;
+        }
+
+        private String getName() {
+            return name;
+        }
+
+        public static final JiraEvent fromName(String name) {
+            Optional<JiraEvent> event = Arrays.stream(JiraEvent.values()).filter((e) -> e.getName().equals(name)).findFirst();
+            return event.isPresent() ? event.get() : Unknown;
+        }
+    }
+
     private static final String WEB_HOOK_EVENT_FIELD = "webhookEvent";
     private static final String WEB_HOOK_JIRA_ID_FIELD = "/issue/id";
-    private static final String JIRA_ISSUE_CREATED = "jira:issue_created";
-    private static final String JIRA_ISSUE_UPDATED = "jira:issue_updated";
-    private static final String JIRA_ISSUE_DELETED = "jira:issue_deleted";
+    private static final String WEB_HOOK_JIRA_SPRINT_ID_FIELD = "/sprint/id";
     private static final Logger LOGGER = LoggerFactory.getLogger(WebHookController.class);
 
     @Autowired
@@ -51,16 +80,32 @@ public class WebHookController {
         main.updateIssuesOnDemand(Arrays.asList(id));
     }
 
+    private void processStringEvent(JsonNode event) {
+        String id = event.at(WEB_HOOK_JIRA_SPRINT_ID_FIELD).asText();
+        main.updateSprint(id);
+    }
+
     @RequestMapping(value="", method = RequestMethod.POST)
     public void receiveJiraEvent(@RequestBody JsonNode event) {
 
         String eventType = event.get(WEB_HOOK_EVENT_FIELD).asText();
-        switch (eventType) {
-            case JIRA_ISSUE_CREATED:
-            case JIRA_ISSUE_UPDATED:
-            case JIRA_ISSUE_DELETED:
+        switch (JiraEvent.fromName(eventType)) {
+            case IssueCreated:
+            case IssueUpdated:
+            case IssueDeleted:
                 processIssueEvent(event);
                 break;
+
+            case SprintClosed:
+            case SprintDeleted:
+            case SprintOpened:
+            case SprintUpdated:
+                processStringEvent(event);
+                break;
+            case SprintCreated:
+                //NOOP;
+                break;
+
             default:
                 LOGGER.info("Unhandled event type: {}", eventType);
         }

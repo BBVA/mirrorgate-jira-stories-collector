@@ -115,6 +115,16 @@ public class Main implements Runnable {
         return toUpdate;
     }
 
+    public void updateSprint(String id) {
+        SprintDTO sprint = sprintApi.getSprint(id);
+        if(sprint != null && sprint.getIssues() != null) {
+            List<Long> ids = sprint.getIssues().stream().map(IssueDTO::getId).collect(Collectors.toList());
+            iterateAndSave(getIssuesByIdAndDeleteNotPresent(ids), false);
+        } else {
+            LOGGER.warn("-> Could not update the sprint {}", id);
+        }
+    }
+
     @Scheduled(cron="${scheduler.cron}")
     public void run() {
 
@@ -122,13 +132,7 @@ public class Main implements Runnable {
         iterateAndSave(service.getRecentIssues(), true);
 
         for(SprintDTO s : getSprintsThatNeedUpdating()) {
-            SprintDTO sprint = sprintApi.getSprint(s.getId());
-            if(sprint != null && sprint.getIssues() != null) {
-                List<Long> ids = sprint.getIssues().stream().map(IssueDTO::getId).collect(Collectors.toList());
-                iterateAndSave(getIssuesByIdAndDeleteNotPresent(ids), false);
-            } else {
-                LOGGER.warn("-> Could not update the sprint {}", s.getName());
-            }
+            updateSprint(s.getId());
         }
 
         LOGGER.info("Ending");
