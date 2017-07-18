@@ -18,6 +18,7 @@ package com.bbva.arq.devops.ae.mirrorgate.collectors.jira;
 
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.api.CollectorService;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.api.SprintService;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.SchedulerConfig;
 import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
 import com.bbva.arq.devops.ae.mirrorgate.core.dto.SprintDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service.IssuesService;
@@ -25,6 +26,9 @@ import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Pageable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.ConfigurationCondition;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -125,7 +129,6 @@ public class Main implements Runnable {
         }
     }
 
-    @Scheduled(cron="${scheduler.cron}")
     public void run() {
 
         LOGGER.info("Starting");
