@@ -81,6 +81,10 @@ public class JiraIssueUtils {
                     return -1;
                 } else if (o2.getStatus() == SprintStatus.ACTIVE) {
                     return 1;
+                } else if (o1.getStatus() == SprintStatus.FUTURE) {
+                    return -1;
+                } else if (o2.getStatus() == SprintStatus.FUTURE) {
+                    return 1;
                 }
             }
             return o1.getEndDate() != null ? o1.getEndDate().compareTo(o2.getEndDate()) : 1;
