@@ -164,7 +164,7 @@ public class JiraIssuesServiceImpl implements IssuesService {
                         .setEstimate(utils.getField(issue, JiraIssueFields.STORY_POINTS, Double.class).get())
                         .setType(issue.getIssueType().getName())
                         .setStatus(statusMapService.getStatusMappings().get(issue.getStatus().getName()))
-                        .setPriority(IssuePriority.fromName(issue.getPriority().getName()))
+                        .setPriority(issue.getPriority() != null ? IssuePriority.fromName(issue.getPriority().getName()): null)
                         .setSprint(utils.getPriorSprint(utils.getField(issue, JiraIssueFields.SPRINT).get()))
                         .setType(issue.getIssueType().getName())
                         .setUpdatedDate(issue.getUpdateDate().toDate())
