@@ -18,13 +18,11 @@ package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.controller;
 
 import com.atlassian.jira.rest.client.api.MetadataRestClient;
 import com.atlassian.jira.rest.client.api.domain.Field;
-import com.atlassian.jira.rest.client.api.domain.Issue;
-import com.atlassian.jira.rest.client.internal.json.BasicIssuesJsonParser;
 import com.atlassian.jira.rest.client.internal.json.IssueJsonParser;
 import com.atlassian.util.concurrent.Promise;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.Main;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueUtils;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
@@ -87,6 +85,9 @@ public class WebHookController {
     @Autowired
     private MetadataRestClient client;
 
+    @Autowired
+    private JiraIssueUtils utils;
+
     @RequestMapping(value="", method = RequestMethod.POST)
     public void receiveJiraEvent(@RequestBody String eventJson) throws JSONException {
 
@@ -94,7 +95,7 @@ public class WebHookController {
 
         String eventType = event.getString(WEB_HOOK_EVENT_FIELD);
 
-        LOGGER.debug("Event {} received", eventType);
+        LOGGER.info("Event {} received", eventType);
 
         switch (JiraEvent.fromName(eventType)) {
             case IssueCreated:
@@ -152,7 +153,7 @@ public class WebHookController {
     private void processIssueEvent(JSONObject issue) throws JSONException {
         //Ugly hack for Jira not to fail due to missing field
         issue.put("expand","names,schema");
-        Issue issuebean = getParser().parse(issue);
+        IssueDTO issuebean = utils.map(getParser().parse(issue));
         main.updateIssuesOnDemand(Arrays.asList(issuebean));
     }
 
