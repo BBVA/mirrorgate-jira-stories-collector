@@ -17,9 +17,12 @@
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config;
 
 
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.Main;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 
 
 @Configuration
@@ -28,5 +31,13 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class SchedulerConfig {
 
     public static final String PROFILE="scheduled";
+
+    @Autowired
+    public Main main;
+
+    @Scheduled(cron="${scheduler.cron}")
+    public void run() {
+        main.run();
+    }
 
 }

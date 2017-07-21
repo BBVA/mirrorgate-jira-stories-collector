@@ -58,20 +58,17 @@ public class JiraIssuesServiceImpl implements IssuesService {
 
     private SearchRestClient client;
     private CollectorStatusService collectorStatusService;
-    private StatusMapService statusMapService;
     private JiraIssueUtils utils;
     private final TimeZone jiraTimeZone;
 
     @Autowired
     public JiraIssuesServiceImpl(SearchRestClient jiraRestClient,
                                  CollectorStatusService collectorStatusService,
-                                 StatusMapService statusMapService,
                                  JiraIssueUtils jiraIssueUtils,
                                  TimeZone jiraTimeZone
     ) {
         this.client = jiraRestClient;
         this.collectorStatusService = collectorStatusService;
-        this.statusMapService = statusMapService;
         this.utils = jiraIssueUtils;
         this.jiraTimeZone = jiraTimeZone;
     }
@@ -95,7 +92,7 @@ public class JiraIssuesServiceImpl implements IssuesService {
             Promise<SearchResult> results = client.searchJql(query,PAGE_SIZE,page.inc(),null);
 
             return StreamSupport.stream(results.claim().getIssues().spliterator(),false)
-                    .map(getIssueMapper()).collect(Collectors.toList());
+                    .map(utils::map).collect(Collectors.toList());
         });
     }
 
@@ -122,7 +119,7 @@ public class JiraIssuesServiceImpl implements IssuesService {
             try {
                 Promise<SearchResult> results = client.searchJql(query);
                 return StreamSupport.stream(results.claim().getIssues().spliterator(),false)
-                        .map(getIssueMapper()).collect(Collectors.toList());
+                        .map(utils::map).collect(Collectors.toList());
             }  catch (RestClientException e) {
                 LOGGER.warn("Exception", e);
                 int statusCode = e.getStatusCode().isPresent() ? e.getStatusCode().get() : 0;
@@ -149,31 +146,5 @@ public class JiraIssuesServiceImpl implements IssuesService {
             }
         });
 
-    }
-
-    private Function<com.atlassian.jira.rest.client.api.domain.Issue, IssueDTO> getIssueMapper() {
-        return issue ->
-                new IssueDTO()
-                        .setId(issue.getId())
-                        .setName(issue.getSummary())
-                        .setJiraKey(issue.getKey())
-                        .setPiNames(utils.objectToStringList(utils.getField(issue, JiraIssueFields.PI, List.class).get()))
-                        .setParentKey(utils.getParentIssueKey(issue))
-                        .setParentId(utils.getParentIssueId(issue))
-                    //Why create JiraIssueFields with an attached class type when we have to pass it in this method?
-                        .setEstimate(utils.getField(issue, JiraIssueFields.STORY_POINTS, Double.class).get())
-                        .setType(issue.getIssueType().getName())
-                        .setStatus(statusMapService.getStatusMappings().get(issue.getStatus().getName()))
-                        .setPriority(issue.getPriority() != null ? IssuePriority.fromName(issue.getPriority().getName()): null)
-                        .setSprint(utils.getPriorSprint(utils.getField(issue, JiraIssueFields.SPRINT).get()))
-                        .setType(issue.getIssueType().getName())
-                        .setUpdatedDate(issue.getUpdateDate().toDate())
-                        .setProject(issue.getProject() == null ? null :
-                                new ProjectDTO()
-                                        .setId(issue.getProject().getId())
-                                        .setName(issue.getProject().getName())
-                                        .setKey(issue.getProject().getKey())
-                        )
-                        .setKeywords(utils.buildKeywords(issue));
     }
 }

@@ -16,8 +16,10 @@
 
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira;
 
+import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.api.CollectorService;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.api.SprintService;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueUtils;
 import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
 import com.bbva.arq.devops.ae.mirrorgate.core.dto.SprintDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service.IssuesService;
@@ -25,6 +27,9 @@ import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Pageable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.ConfigurationCondition;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -48,8 +53,24 @@ public class Main implements Runnable {
     @Autowired
     private IssuesService service;
 
-    public void updateIssuesOnDemand(List<Long> ids) {
-        iterateAndSave(getIssuesByIdAndDeleteNotPresent(ids), true);
+    @Autowired
+    private JiraIssueUtils utils;
+
+    public void updateIssuesOnDemand(final List<Issue> issue) {
+        iterateAndSave(new Pageable<IssueDTO>() {
+            boolean returned = false;
+
+            @Override
+            public List<IssueDTO> nextPage() {
+                List<IssueDTO> value = returned ? new ArrayList<>() : issue.stream().map(utils::map).collect(Collectors.toList());
+                returned = true;
+                return value;
+            }
+        }, true);
+    }
+
+    public void deleteIssue(Long id) {
+        sprintApi.deleteIssue(id);
     }
 
     private void iterateAndSave(Pageable<IssueDTO> pagedIssues, boolean updateCollectorsDate) {
@@ -73,7 +94,7 @@ public class Main implements Runnable {
                 idSet.remove(issueDTO.getId());
             }
             if(result.size() == 0) {
-                idSet.stream().forEach((i) -> sprintApi.deleteIssue(i));
+                idSet.stream().forEach((i) -> deleteIssue(i));
             }
             return result;
         };
@@ -125,7 +146,6 @@ public class Main implements Runnable {
         }
     }
 
-    @Scheduled(cron="${scheduler.cron}")
     public void run() {
 
         LOGGER.info("Starting");
