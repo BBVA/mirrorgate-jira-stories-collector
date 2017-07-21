@@ -16,8 +16,17 @@
 
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.controller;
 
+import com.atlassian.jira.rest.client.api.MetadataRestClient;
+import com.atlassian.jira.rest.client.api.domain.Field;
+import com.atlassian.jira.rest.client.api.domain.Issue;
+import com.atlassian.jira.rest.client.internal.json.BasicIssuesJsonParser;
+import com.atlassian.jira.rest.client.internal.json.IssueJsonParser;
+import com.atlassian.util.concurrent.Promise;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.Main;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueUtils;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by alfonso on 13/07/17.
@@ -68,39 +78,37 @@ public class WebHookController {
     }
 
     private static final String WEB_HOOK_EVENT_FIELD = "webhookEvent";
-    private static final String WEB_HOOK_JIRA_ID_FIELD = "/issue/id";
-    private static final String WEB_HOOK_JIRA_SPRINT_ID_FIELD = "/sprint/id";
+    private static final String WEB_HOOK_JIRA_ID_FIELD = "id";
     private static final Logger LOGGER = LoggerFactory.getLogger(WebHookController.class);
 
     @Autowired
     private Main main;
 
-    private void processIssueEvent(JsonNode event) {
-        Long id = event.at(WEB_HOOK_JIRA_ID_FIELD).asLong();
-        main.updateIssuesOnDemand(Arrays.asList(id));
-    }
-
-    private void processStringEvent(JsonNode event) {
-        String id = event.at(WEB_HOOK_JIRA_SPRINT_ID_FIELD).asText();
-        main.updateSprint(id);
-    }
+    @Autowired
+    private MetadataRestClient client;
 
     @RequestMapping(value="", method = RequestMethod.POST)
-    public void receiveJiraEvent(@RequestBody JsonNode event) {
+    public void receiveJiraEvent(@RequestBody String eventJson) throws JSONException {
 
-        String eventType = event.get(WEB_HOOK_EVENT_FIELD).asText();
+        JSONObject event = new JSONObject(eventJson);
+
+        String eventType = event.getString(WEB_HOOK_EVENT_FIELD);
+
+        LOGGER.debug("Event {} received", eventType);
+
         switch (JiraEvent.fromName(eventType)) {
             case IssueCreated:
             case IssueUpdated:
-            case IssueDeleted:
-                processIssueEvent(event);
+                processIssueEvent(event.getJSONObject("issue"));
                 break;
-
+            case IssueDeleted:
+                processIssueDeleteEvent(event.getJSONObject("issue"));
+                break;
             case SprintClosed:
             case SprintDeleted:
             case SprintOpened:
             case SprintUpdated:
-                processStringEvent(event);
+                processStringEvent(event.getJSONObject("sprint"));
                 break;
             case SprintCreated:
                 //NOOP;
@@ -111,5 +119,52 @@ public class WebHookController {
         }
 
     }
+
+    private IssueJsonParser issueParser;
+
+    private synchronized IssueJsonParser getParser() {
+        if(issueParser == null) {
+            Promise<Iterable<Field>> fields = client.getFields();
+
+            JSONObject names = new JSONObject();
+            JSONObject schema = new JSONObject();
+
+            try {
+                fields.get().forEach((field) -> {
+                    try {
+                        names.put(field.getId(), field.getName());
+                        schema.put(field.getId(), new JSONObject().put("type", field.getFieldType().name()));
+                    } catch (JSONException e) {
+                        LOGGER.error("Error reading field value from metadata", e);
+                    }
+                });
+            } catch (InterruptedException e) {
+                LOGGER.error("Error, interrupted while generating parser", e);
+            } catch (ExecutionException e) {
+                LOGGER.error("Error while generating parser", e);
+            }
+
+            issueParser = new IssueJsonParser(names, schema);
+        }
+        return issueParser;
+    }
+
+    private void processIssueEvent(JSONObject issue) throws JSONException {
+        //Ugly hack for Jira not to fail due to missing field
+        issue.put("expand","names,schema");
+        Issue issuebean = getParser().parse(issue);
+        main.updateIssuesOnDemand(Arrays.asList(issuebean));
+    }
+
+    private void processIssueDeleteEvent(JSONObject issue) throws JSONException {
+        Long id = issue.getLong(WEB_HOOK_JIRA_ID_FIELD);
+        main.deleteIssue(id);
+    }
+
+    private void processStringEvent(JSONObject event) throws JSONException{
+        String id = event.getString(WEB_HOOK_JIRA_ID_FIELD);
+        main.updateSprint(id);
+    }
+
 
 }

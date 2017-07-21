@@ -21,10 +21,15 @@ import com.atlassian.jira.rest.client.api.domain.IssueField;
 import com.atlassian.jira.rest.client.api.domain.IssueLink;
 import com.atlassian.jira.rest.client.api.domain.IssueLinkType.Direction;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.FieldsConfig;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service.StatusMapService;
+import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
+import com.bbva.arq.devops.ae.mirrorgate.core.dto.ProjectDTO;
 import com.bbva.arq.devops.ae.mirrorgate.core.dto.SprintDTO;
+import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssuePriority;
 import com.bbva.arq.devops.ae.mirrorgate.core.utils.SprintStatus;
 import java.lang.reflect.Array;
 import java.net.URI;
+import java.util.function.Function;
 import java.util.stream.StreamSupport;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -57,6 +62,9 @@ public class JiraIssueUtils {
     @Autowired
     @Qualifier(FieldsConfig.JIRA_FIELDS_BEAN)
     private Map<JiraIssueFields, String> jiraFields;
+
+    @Autowired
+    private StatusMapService statusMapService;
 
     public static class JiraIssueField<T>{
 
@@ -259,6 +267,31 @@ public class JiraIssueUtils {
             .stream(issue.getIssueLinks().spliterator(), false)
             .filter(i -> i.getIssueLinkType().getDirection().equals(Direction.INBOUND))
             .findFirst();
+    }
+
+    public IssueDTO map(Issue issue) {
+        return new IssueDTO()
+                .setId(issue.getId())
+                .setName(issue.getSummary())
+                .setJiraKey(issue.getKey())
+                .setPiNames(objectToStringList(getField(issue, JiraIssueFields.PI, List.class).get()))
+                .setParentKey(getParentIssueKey(issue))
+                .setParentId(getParentIssueId(issue))
+                //Why create JiraIssueFields with an attached class type when we have to pass it in this method?
+                .setEstimate(getField(issue, JiraIssueFields.STORY_POINTS, Double.class).get())
+                .setType(issue.getIssueType().getName())
+                .setStatus(statusMapService.getStatusMappings().get(issue.getStatus().getName()))
+                .setPriority(issue.getPriority() != null ? IssuePriority.fromName(issue.getPriority().getName()): null)
+                .setSprint(getPriorSprint(getField(issue, JiraIssueFields.SPRINT).get()))
+                .setType(issue.getIssueType().getName())
+                .setUpdatedDate(issue.getUpdateDate().toDate())
+                .setProject(issue.getProject() == null ? null :
+                        new ProjectDTO()
+                                .setId(issue.getProject().getId())
+                                .setName(issue.getProject().getName())
+                                .setKey(issue.getProject().getKey())
+                )
+                .setKeywords(buildKeywords(issue));
     }
 
 }
