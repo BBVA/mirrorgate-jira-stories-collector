@@ -16,8 +16,10 @@
 
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira;
 
+import com.atlassian.jira.rest.client.api.domain.Issue;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.api.CollectorService;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.api.SprintService;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueUtils;
 import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
 import com.bbva.arq.devops.ae.mirrorgate.core.dto.SprintDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service.IssuesService;
@@ -25,6 +27,9 @@ import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Pageable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.ConfigurationCondition;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -48,6 +53,25 @@ public class Main implements Runnable {
     @Autowired
     private IssuesService service;
 
+    @Autowired
+    private JiraIssueUtils utils;
+
+    public void updateIssuesOnDemand(final List<Issue> issue) {
+        iterateAndSave(new Pageable<IssueDTO>() {
+            boolean returned = false;
+
+            @Override
+            public List<IssueDTO> nextPage() {
+                List<IssueDTO> value = returned ? new ArrayList<>() : issue.stream().map(utils::map).collect(Collectors.toList());
+                returned = true;
+                return value;
+            }
+        }, true);
+    }
+
+    public void deleteIssue(Long id) {
+        sprintApi.deleteIssue(id);
+    }
 
     private void iterateAndSave(Pageable<IssueDTO> pagedIssues, boolean updateCollectorsDate) {
         List<IssueDTO> issues;
@@ -70,7 +94,7 @@ public class Main implements Runnable {
                 idSet.remove(issueDTO.getId());
             }
             if(result.size() == 0) {
-                idSet.stream().forEach((i) -> sprintApi.deleteIssue(i));
+                idSet.stream().forEach((i) -> deleteIssue(i));
             }
             return result;
         };
@@ -112,20 +136,23 @@ public class Main implements Runnable {
         return toUpdate;
     }
 
-    @Scheduled(cron="${scheduler.cron}")
+    public void updateSprint(String id) {
+        SprintDTO sprint = sprintApi.getSprint(id);
+        if(sprint != null && sprint.getIssues() != null) {
+            List<Long> ids = sprint.getIssues().stream().map(IssueDTO::getId).collect(Collectors.toList());
+            iterateAndSave(getIssuesByIdAndDeleteNotPresent(ids), false);
+        } else {
+            LOGGER.warn("-> Could not update the sprint {}", id);
+        }
+    }
+
     public void run() {
 
         LOGGER.info("Starting");
         iterateAndSave(service.getRecentIssues(), true);
 
         for(SprintDTO s : getSprintsThatNeedUpdating()) {
-            SprintDTO sprint = sprintApi.getSprint(s.getId());
-            if(sprint != null && sprint.getIssues() != null) {
-                List<Long> ids = sprint.getIssues().stream().map(IssueDTO::getId).collect(Collectors.toList());
-                iterateAndSave(getIssuesByIdAndDeleteNotPresent(ids), false);
-            } else {
-                LOGGER.warn("-> Could not update the sprint {}", s.getName());
-            }
+            updateSprint(s.getId());
         }
 
         LOGGER.info("Ending");

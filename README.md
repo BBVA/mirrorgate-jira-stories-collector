@@ -12,9 +12,24 @@ docker run -e "JIRA_URL=http://my.jira.corp" -e "JIRA_USERNAME=admin" -e "JIRA_P
 
 You can also specify MIRRORGATE_USERNAME and MIRRORGATE_PASSWORD if it's secured.
 
-## Running in Amazon Lambda
+## Configuring the webhook
 
-Create a lambda with the folowing handler class `com.bbva.arq.devops.ae.mirrorgate.collectors.jira.LambdaHandler`. Note it will execute only once, so you will have to use a timed trigger to execute it eventually.
+When configured to use the webserver (default is true), the collector exposes `/webhook/` endpoint that can be used to
+avoid polling Jira every time and update the data when ever an issue edition happens.
+
+To use this feature ensure to disable batch execution (see configuring) and keep web-environment enabled.
+Then add the webhook to the jira server (you will need admin priviledges to do so) with the `issue_created`,
+`issue_updated`, `issue_deleted` and `sprint_*` events enabled.
+ 
+In the first execution the collector will attempt to gather the configured history.
+  
+## Polling instead of webhook
+
+Alternatively you can set the `SPRING_PROFILES_ACTIVE=scheduled` env variable so that
+the collector polls every configured amount of time (by default every minute) for changes.
+  
+Note that some inconsistencies can happen if you use the polling approach because issue deletions
+and sprint changes will not be captured by JQL's that the collector executes against Jira.
 
 ## Configuring
 

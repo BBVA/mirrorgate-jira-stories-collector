@@ -33,12 +33,13 @@ repositories {
 dependencies {
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.8.8'
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.8'
-	compile('org.springframework.boot:spring-boot-starter')
+	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('com.atlassian.jira:jira-rest-java-client-core:4.0.0')
 	compile('com.atlassian.fugue:fugue:2.6.1')
 	compile('org.springframework:spring-web')
 	compile('com.bbva.arq.devops.ae.mirrorgate:mirrorgate-core:0.0.1-SNAPSHOT')
 	compile('org.hibernate:hibernate-validator:5.3.5.Final')
+    compile("org.springframework.boot:spring-boot-starter-actuator")
 
 	compile (
 			'com.amazonaws:aws-lambda-java-core:1.1.0',
