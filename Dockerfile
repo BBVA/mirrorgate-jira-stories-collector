@@ -9,6 +9,4 @@ COPY entrypoint.sh /mirrorgate/entrypoint.sh
 COPY build/libs/*.jar /mirrorgate/
 WORKDIR /mirrorgate
 
-ENV SPRING_PROFILES_ACTIVE=scheduled
-
 ENTRYPOINT ["/mirrorgate/entrypoint.sh"]
