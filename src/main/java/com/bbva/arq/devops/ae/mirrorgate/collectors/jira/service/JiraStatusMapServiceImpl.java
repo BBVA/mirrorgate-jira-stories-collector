@@ -47,7 +47,7 @@ public class JiraStatusMapServiceImpl implements StatusMapService {
     @Value("${jira.url}")
     private String jiraUrl;
 
-    private Map<String, IssueStatus> statusCache;
+    private Map<Long, IssueStatus> statusCache;
 
     //TODO: Allow configurable Mappings
     private static final Map<String, IssueStatus> STATUS_DEFAULTS = new HashMap<String, IssueStatus>(){{
@@ -90,14 +90,13 @@ public class JiraStatusMapServiceImpl implements StatusMapService {
         this.restTemplate = restTemplate;
     }
 
-    private synchronized Map<String, IssueStatus> getStatusMappings() {
+    private synchronized Map<Long, IssueStatus> getStatusMappings() {
 
         if(statusCache == null) {
             List jsa = restTemplate.getForObject(jiraUrl + SERVER_URI, ArrayList.class);
-
             statusCache = (Map) jsa.stream().collect(Collectors.toMap(
-                    (map) -> getName(map),
-                    (map) -> getStatus(map)
+                    (status) -> Long.parseLong(getField(status, "id")),
+                    (status) -> getStatus(status)
             ));
         }
 
@@ -105,10 +104,10 @@ public class JiraStatusMapServiceImpl implements StatusMapService {
     }
 
     @Override
-    public IssueStatus getStatusFor(String name) {
-        IssueStatus issueStatus = getStatusMappings().get(name);
+    public IssueStatus getStatusFor(Long id) {
+        IssueStatus issueStatus = getStatusMappings().get(id);
         if(issueStatus == null) {
-            LOGGER.warn("IssueStatus not found for {}", name);
+            LOGGER.warn("IssueStatus not found for {}", id);
         }
         return issueStatus;
     }

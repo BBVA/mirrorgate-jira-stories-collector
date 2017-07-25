@@ -280,7 +280,7 @@ public class JiraIssueUtils {
                 //Why create JiraIssueFields with an attached class type when we have to pass it in this method?
                 .setEstimate(getField(issue, JiraIssueFields.STORY_POINTS, Double.class).get())
                 .setType(issue.getIssueType().getName())
-                .setStatus(statusMapService.getStatusFor(issue.getStatus().getName()))
+                .setStatus(statusMapService.getStatusFor(issue.getStatus().getId()))
                 .setPriority(issue.getPriority() != null ? IssuePriority.fromName(issue.getPriority().getName()): null)
                 .setSprint(getPriorSprint(getField(issue, JiraIssueFields.SPRINT).get()))
                 .setType(issue.getIssueType().getName())
