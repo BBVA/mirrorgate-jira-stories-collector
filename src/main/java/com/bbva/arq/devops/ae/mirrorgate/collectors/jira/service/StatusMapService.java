@@ -25,6 +25,6 @@ import java.util.Map;
  */
 public interface StatusMapService {
 
-    Map<String,IssueStatus> getStatusMappings();
+    IssueStatus getStatusFor(Long id);
 
 }

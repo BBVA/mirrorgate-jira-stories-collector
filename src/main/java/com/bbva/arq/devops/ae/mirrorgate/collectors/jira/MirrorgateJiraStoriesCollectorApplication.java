@@ -28,9 +28,6 @@ public class MirrorgateJiraStoriesCollectorApplication {
 
 	public static void main(String[] args) {
 		ConfigurableApplicationContext ctx = SpringApplication.run(MirrorgateJiraStoriesCollectorApplication.class, args);
-
-		if(!Arrays.asList(ctx.getEnvironment().getActiveProfiles()).contains(SchedulerConfig.PROFILE)) {
-			ctx.getBean(Main.class).run();
-		}
+		ctx.getBean(Main.class).run();
 	}
 }
