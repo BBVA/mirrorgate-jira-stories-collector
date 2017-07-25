@@ -22,6 +22,8 @@ package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service;
 
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config;
 import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssueStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +38,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class JiraStatusMapServiceImpl implements StatusMapService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JiraStatusMapServiceImpl.class);
 
     RestTemplate restTemplate;
     private static final String SERVER_URI="/rest/api/2/status/";
@@ -86,8 +90,7 @@ public class JiraStatusMapServiceImpl implements StatusMapService {
         this.restTemplate = restTemplate;
     }
 
-    @Override
-    public synchronized Map<String, IssueStatus> getStatusMappings() {
+    private synchronized Map<String, IssueStatus> getStatusMappings() {
 
         if(statusCache == null) {
             List jsa = restTemplate.getForObject(jiraUrl + SERVER_URI, ArrayList.class);
@@ -99,5 +102,14 @@ public class JiraStatusMapServiceImpl implements StatusMapService {
         }
 
         return statusCache;
+    }
+
+    @Override
+    public IssueStatus getStatusFor(String name) {
+        IssueStatus issueStatus = getStatusMappings().get(name);
+        if(issueStatus == null) {
+            LOGGER.warn("IssueStatus not found for {}", name);
+        }
+        return issueStatus;
     }
 }
