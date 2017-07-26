@@ -57,7 +57,7 @@ public class Main implements Runnable {
                 returned = true;
                 return value;
             }
-        }, true);
+        }, false);
     }
 
     public void deleteIssue(Long id) {
@@ -137,7 +137,7 @@ public class Main implements Runnable {
         }
     }
 
-    public void run() {
+    public synchronized void run() {
 
         LOGGER.info("Starting");
         iterateAndSave(service.getRecentIssues(), true);
