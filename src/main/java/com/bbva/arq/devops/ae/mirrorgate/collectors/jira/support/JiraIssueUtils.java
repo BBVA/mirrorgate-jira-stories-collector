@@ -21,6 +21,7 @@ import com.atlassian.jira.rest.client.api.domain.IssueField;
 import com.atlassian.jira.rest.client.api.domain.IssueLink;
 import com.atlassian.jira.rest.client.api.domain.IssueLinkType.Direction;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.FieldsConfig;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service.IssueTypeMapService;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service.StatusMapService;
 import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
 import com.bbva.arq.devops.ae.mirrorgate.core.dto.ProjectDTO;
@@ -65,6 +66,9 @@ public class JiraIssueUtils {
 
     @Autowired
     private StatusMapService statusMapService;
+
+    @Autowired
+    private IssueTypeMapService issueTypeMapService;
 
     public static class JiraIssueField<T>{
 
@@ -279,7 +283,7 @@ public class JiraIssueUtils {
                 .setParentId(getParentIssueId(issue))
                 //Why create JiraIssueFields with an attached class type when we have to pass it in this method?
                 .setEstimate(getField(issue, JiraIssueFields.STORY_POINTS, Double.class).get())
-                .setType(issue.getIssueType().getName())
+                .setType(issueTypeMapService.getIssueTypeFor(issue.getIssueType().getId()))
                 .setStatus(statusMapService.getStatusFor(issue.getStatus().getId()))
                 .setPriority(issue.getPriority() != null ? IssuePriority.fromName(issue.getPriority().getName()): null)
                 .setSprint(getPriorSprint(getField(issue, JiraIssueFields.SPRINT).get()))
