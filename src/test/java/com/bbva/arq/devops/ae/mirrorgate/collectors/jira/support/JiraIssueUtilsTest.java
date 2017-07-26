@@ -16,13 +16,19 @@
 
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support;
 
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service.IssueTypeMapService;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service.StatusMapService;
 import com.bbva.arq.devops.ae.mirrorgate.core.dto.SprintDTO;
 import com.bbva.arq.devops.ae.mirrorgate.core.utils.SprintStatus;
+import java.util.List;
+import java.util.Map;
 import org.joda.time.DateTime;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Arrays;
@@ -39,7 +45,23 @@ import static org.junit.Assert.assertNotNull;
 public class JiraIssueUtilsTest {
 
     @Autowired
-    JiraIssueUtils issueUtils;
+    private List<String> keywordsFields;
+
+    @Autowired
+    private Map<JiraIssueFields, String> jiraFields;
+
+    @Autowired
+    private StatusMapService statusMapService;
+
+    @MockBean
+    private IssueTypeMapService issueTypeMapService;
+
+    private JiraIssueUtils issueUtils;
+
+    @Before
+    public void init(){
+        issueUtils = new JiraIssueUtils(keywordsFields, jiraFields, statusMapService, issueTypeMapService);
+    }
 
     @Test
     public void itShouldParseSprintsCorrectly() {

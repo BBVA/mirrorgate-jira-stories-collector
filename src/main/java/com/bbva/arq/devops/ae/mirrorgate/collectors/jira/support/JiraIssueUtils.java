@@ -56,52 +56,27 @@ public class JiraIssueUtils {
 
     private static Logger LOGGER = LoggerFactory.getLogger(JiraIssueUtils.class);
 
-    @Autowired
-    @Qualifier(FieldsConfig.KEYWORDS_FIELD_BEAN)
     private List<String> keywordsFields;
 
-    @Autowired
-    @Qualifier(FieldsConfig.JIRA_FIELDS_BEAN)
     private Map<JiraIssueFields, String> jiraFields;
 
-    @Autowired
     private StatusMapService statusMapService;
 
-    @Autowired
     private IssueTypeMapService issueTypeMapService;
 
-    public static class JiraIssueField<T>{
 
-        T value;
+    @Autowired
+    public JiraIssueUtils(
+        @Qualifier(FieldsConfig.KEYWORDS_FIELD_BEAN) List<String> keywordsFields,
+        @Qualifier(FieldsConfig.JIRA_FIELDS_BEAN) Map<JiraIssueFields, String> jiraFields,
+        StatusMapService statusMapService,
+        IssueTypeMapService issueTypeMapService)
+    {
 
-        protected JiraIssueField(Object value) {
-            this.value = (T) value;
-        }
-
-        public T get() {
-            return value;
-        }
-
-    }
-
-    private static class SprintDateComparator implements Comparator<SprintDTO> {
-
-        @Override
-        public int compare(SprintDTO o1, SprintDTO o2) {
-            if(o1.getStatus() != o2.getStatus()) {
-                if (o1.getStatus() == SprintStatus.ACTIVE) {
-                    return -1;
-                } else if (o2.getStatus() == SprintStatus.ACTIVE) {
-                    return 1;
-                } else if (o1.getStatus() == SprintStatus.FUTURE) {
-                    return -1;
-                } else if (o2.getStatus() == SprintStatus.FUTURE) {
-                    return 1;
-                }
-            }
-            return o1.getEndDate() != null ? o1.getEndDate().compareTo(o2.getEndDate()) : 1;
-        }
-
+        this.keywordsFields = keywordsFields;
+        this.jiraFields = jiraFields;
+        this.statusMapService = statusMapService;
+        this.issueTypeMapService = issueTypeMapService;
     }
 
     public static Object getFieldValue(Issue issue, String field) {
@@ -296,6 +271,40 @@ public class JiraIssueUtils {
                                 .setKey(issue.getProject().getKey())
                 )
                 .setKeywords(buildKeywords(issue));
+    }
+
+    public static class JiraIssueField<T>{
+
+        T value;
+
+        protected JiraIssueField(Object value) {
+            this.value = (T) value;
+        }
+
+        public T get() {
+            return value;
+        }
+
+    }
+
+    private static class SprintDateComparator implements Comparator<SprintDTO> {
+
+        @Override
+        public int compare(SprintDTO o1, SprintDTO o2) {
+            if(o1.getStatus() != o2.getStatus()) {
+                if (o1.getStatus() == SprintStatus.ACTIVE) {
+                    return -1;
+                } else if (o2.getStatus() == SprintStatus.ACTIVE) {
+                    return 1;
+                } else if (o1.getStatus() == SprintStatus.FUTURE) {
+                    return -1;
+                } else if (o2.getStatus() == SprintStatus.FUTURE) {
+                    return 1;
+                }
+            }
+            return o1.getEndDate() != null ? o1.getEndDate().compareTo(o2.getEndDate()) : 1;
+        }
+
     }
 
 }
