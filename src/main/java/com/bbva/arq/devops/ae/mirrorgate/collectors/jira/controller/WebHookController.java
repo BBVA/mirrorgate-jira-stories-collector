@@ -23,19 +23,21 @@ import com.atlassian.util.concurrent.Promise;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.Main;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueUtils;
 import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import javax.annotation.PostConstruct;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Created by alfonso on 13/07/17.
@@ -55,8 +57,7 @@ public class WebHookController {
         SprintDeleted ("sprint_deleted"),
         SprintOpened ("sprint_opened"),
         SprintClosed ("sprint_closed"),
-        Unknown ("?"),
-        ;
+        Unknown ("?");
 
 
         private String name;
@@ -87,6 +88,9 @@ public class WebHookController {
 
     @Autowired
     private JiraIssueUtils utils;
+
+    @Value("#{'${jira.issue.types:Epic,Feature,Story,Bug,Task}'.split(',')}")
+    private Set<String> issueTypes;
 
     @RequestMapping(value="", method = RequestMethod.POST)
     public void receiveJiraEvent(@RequestBody String eventJson) throws JSONException {
@@ -154,7 +158,10 @@ public class WebHookController {
         //Ugly hack for Jira not to fail due to missing field
         issue.put("expand","names,schema");
         IssueDTO issuebean = utils.map(getParser().parse(issue));
-        main.updateIssuesOnDemand(Arrays.asList(issuebean));
+
+        if(issueTypes.contains(issuebean.getType())) {
+            main.updateIssuesOnDemand(Arrays.asList(issuebean));
+        }
     }
 
     private void processIssueDeleteEvent(JSONObject issue) throws JSONException {
@@ -166,6 +173,5 @@ public class WebHookController {
         String id = event.getString(WEB_HOOK_JIRA_ID_FIELD);
         main.updateSprint(id);
     }
-
 
 }
