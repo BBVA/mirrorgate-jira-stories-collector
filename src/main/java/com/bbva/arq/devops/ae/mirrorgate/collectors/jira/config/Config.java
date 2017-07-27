@@ -22,8 +22,10 @@ import com.atlassian.jira.rest.client.api.SearchRestClient;
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Optional;
-import java.util.TimeZone;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssueType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.client.support.BasicAuthorizationInterceptor;
@@ -41,6 +43,8 @@ public class Config {
 
     public static final String MIRRORGATE_REST_TEMPLATE = "MirrorGateRestTemplate";
     public static final String JIRA_REST_TEMPLATE = "JiraRestTemplate";
+    public static final String JIRA_TYPES_MAPPING = "JiraTypeMapping";
+    public static final String JIRA_TYPES = "JiraTypes";
 
     @Value("${jira.url}")
     private String jiraUrl;
@@ -59,6 +63,21 @@ public class Config {
 
     @Value("${jira.timezone:}")
     private Optional<String> jiraTimeZone;
+
+    @Value("#{'${jira.types.mappings.bug}'.split(',')}")
+    private List<String> bugTypes;
+
+    @Value("#{'${jira.types.mappings.epic}'.split(',')}")
+    private List<String> epicTypes;
+
+    @Value("#{'${jira.types.mappings.feature}'.split(',')}")
+    private List<String> featureTypes;
+
+    @Value("#{'${jira.types.mappings.story}'.split(',')}")
+    private List<String> storyTypes;
+
+    @Value("#{'${jira.types.mappings.task}'.split(',')}")
+    private List<String> taskTypes;
 
     @Bean
     public synchronized JiraRestClient getJiraRestClient() {
@@ -108,6 +127,33 @@ public class Config {
         restTemplate.getInterceptors().add(
                 new BasicAuthorizationInterceptor(jiraUserName, jiraPassword));
         return restTemplate;
+    }
+
+    @Bean(JIRA_TYPES_MAPPING)
+    public Map<String, IssueType> getJiraTypeMapping() {
+        Map<String, IssueType> issueTypeDefaults = new HashMap<>(10);
+
+        bugTypes.forEach((t) -> issueTypeDefaults.put(t, IssueType.BUG));
+        featureTypes.forEach((t) -> issueTypeDefaults.put(t, IssueType.FEATURE));
+        storyTypes.forEach((t) -> issueTypeDefaults.put(t, IssueType.STORY));
+        taskTypes.forEach((t) -> issueTypeDefaults.put(t, IssueType.TASK));
+        epicTypes.forEach((t) -> issueTypeDefaults.put(t, IssueType.EPIC));
+
+        return issueTypeDefaults;
+
+    }
+
+    @Bean(JIRA_TYPES)
+    public String getJiraTypes() {
+
+        Set<String> all = new HashSet<>();
+        all.addAll(bugTypes.stream().filter((s) -> s.length() > 0).collect(Collectors.toList()));
+        all.addAll(featureTypes.stream().filter((s) -> s.length() > 0).collect(Collectors.toList()));
+        all.addAll(storyTypes.stream().filter((s) -> s.length() > 0).collect(Collectors.toList()));
+        all.addAll(taskTypes.stream().filter((s) -> s.length() > 0).collect(Collectors.toList()));
+        all.addAll(epicTypes.stream().filter((s) -> s.length() > 0).collect(Collectors.toList()));
+
+        return String.join(",", all);
     }
 
     @Bean

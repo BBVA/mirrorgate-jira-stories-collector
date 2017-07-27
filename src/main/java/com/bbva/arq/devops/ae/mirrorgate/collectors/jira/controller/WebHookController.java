@@ -88,9 +88,6 @@ public class WebHookController {
     @Autowired
     private JiraIssueUtils utils;
 
-    @Value("#{'${jira.issue.types:Epic,Feature,Story,Bug,Task}'.split(',')}")
-    private Set<String> issueTypes;
-
     @RequestMapping(value="", method = RequestMethod.POST)
     public void receiveJiraEvent(@RequestBody String eventJson) throws JSONException {
 
@@ -156,10 +153,10 @@ public class WebHookController {
     private void processIssueEvent(JSONObject issue) throws JSONException {
         //Ugly hack for Jira not to fail due to missing field
         issue.put("expand","names,schema");
-        IssueDTO issuebean = utils.map(getParser().parse(issue));
+        IssueDTO issueBean = utils.map(getParser().parse(issue));
 
-        if(issueTypes.contains(issuebean.getType())) {
-            main.updateIssuesOnDemand(Arrays.asList(issuebean));
+        if(issueBean.getType() != null) {
+            main.updateIssuesOnDemand(Arrays.asList(issueBean));
         }
     }
 
