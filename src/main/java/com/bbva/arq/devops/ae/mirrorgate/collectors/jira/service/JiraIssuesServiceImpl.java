@@ -20,26 +20,27 @@ import com.atlassian.jira.rest.client.api.RestClientException;
 import com.atlassian.jira.rest.client.api.SearchRestClient;
 import com.atlassian.jira.rest.client.api.domain.SearchResult;
 import com.atlassian.util.concurrent.Promise;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Counter;
-import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueFields;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueUtils;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Pageable;
 import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
-import com.bbva.arq.devops.ae.mirrorgate.core.dto.ProjectDTO;
-import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssuePriority;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import static com.amazonaws.regions.ServiceAbbreviations.Config;
+import static com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config.JIRA_TYPES;
 
 /**
  * Created by alfonso on 26/05/17.
@@ -53,7 +54,6 @@ public class JiraIssuesServiceImpl implements IssuesService {
     private static final String ISSUES_BY_ID_QUERY_PATTERN="id IN (%s)";
     private static final int PAGE_SIZE=10;
 
-    @Value("${jira.issue.types:Epic,Feature,Story,Bug,Task}")
     private String issueTypes;
 
     private SearchRestClient client;
@@ -62,11 +62,13 @@ public class JiraIssuesServiceImpl implements IssuesService {
     private final TimeZone jiraTimeZone;
 
     @Autowired
-    public JiraIssuesServiceImpl(SearchRestClient jiraRestClient,
+    public JiraIssuesServiceImpl(@Qualifier(JIRA_TYPES) String issueTypes,
+                                 SearchRestClient jiraRestClient,
                                  CollectorStatusService collectorStatusService,
                                  JiraIssueUtils jiraIssueUtils,
                                  TimeZone jiraTimeZone
     ) {
+        this.issueTypes = issueTypes;
         this.client = jiraRestClient;
         this.collectorStatusService = collectorStatusService;
         this.utils = jiraIssueUtils;
