@@ -16,6 +16,7 @@
 
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service;
 
+import com.atlassian.jira.rest.client.api.domain.Status;
 import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssueStatus;
 
 import java.util.Map;
@@ -25,6 +26,6 @@ import java.util.Map;
  */
 public interface StatusMapService {
 
-    IssueStatus getStatusFor(Long id);
+    IssueStatus getStatusFor(Status status);
 
 }

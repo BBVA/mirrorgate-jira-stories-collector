@@ -39,9 +39,12 @@ public class JiraIssueTypeMapServiceImpl implements IssueTypeMapService {
     }
 
     @Override
-    public String getIssueTypeFor(Long id) {
-        String pre = issueTypeCache.get(id);
+    public String getIssueTypeFor(com.atlassian.jira.rest.client.api.domain.IssueType type) {
+        String pre = issueTypeCache.get(type.getId());
         IssueType target = pre == null ? null : issueTypeMapping.get(pre);
+        if(target == null) {
+            LOGGER.warn("Type mapping not found for {} with id {}", type.getName(), type.getId());
+        }
         return target == null ? null : target.getName();
     }
 
