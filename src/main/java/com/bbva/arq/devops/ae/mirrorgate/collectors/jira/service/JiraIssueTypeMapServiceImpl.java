@@ -2,6 +2,7 @@ package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service;
 
 import com.atlassian.jira.rest.client.api.MetadataRestClient;
 import com.atlassian.util.concurrent.Promise;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.exception.IssueMapException;
 import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssueType;
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -20,30 +22,27 @@ public class JiraIssueTypeMapServiceImpl implements IssueTypeMapService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JiraStatusMapServiceImpl.class);
 
-    //TODO: Allow configurable Mappings
-    private static final Map<String, IssueType> ISSUE_TYPE_DEFAULTS = new HashMap<String, IssueType>(){{
-        put("Bug", IssueType.BUG);
-        put("Epic", IssueType.EPIC);
-        put("Feature", IssueType.FEATURE);
-        put("Story", IssueType.STORY);
-        put("Task", IssueType.TASK);
-    }};
-
     private Map<Long, String> issueTypeCache = new HashMap<>();
+
+    private Map<String, IssueType> issueTypeMapping;
 
     private MetadataRestClient metadataRestClient;
 
     @Autowired
-    public JiraIssueTypeMapServiceImpl(MetadataRestClient metadataRestClient) {
-
+    public JiraIssueTypeMapServiceImpl(
+            @Qualifier(Config.JIRA_TYPES_MAPPING)
+            Map<String, IssueType> issueTypeMapping,
+            MetadataRestClient metadataRestClient
+    ) {
+        this.issueTypeMapping = issueTypeMapping;
         this.metadataRestClient = metadataRestClient;
     }
 
-
     @Override
     public String getIssueTypeFor(Long id) {
-
-        return ISSUE_TYPE_DEFAULTS.get(issueTypeCache.get(id)).getName();
+        String pre = issueTypeCache.get(id);
+        IssueType target = pre == null ? null : issueTypeMapping.get(pre);
+        return target == null ? null : target.getName();
     }
 
     @PostConstruct
@@ -63,6 +62,7 @@ public class JiraIssueTypeMapServiceImpl implements IssueTypeMapService {
             LOGGER.error("Execution Exception while trying to recover issue types");
             throw new IssueMapException(e);
         }
+
     }
 
 }

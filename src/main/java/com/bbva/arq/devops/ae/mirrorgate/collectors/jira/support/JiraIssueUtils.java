@@ -262,7 +262,6 @@ public class JiraIssueUtils {
                 .setStatus(statusMapService.getStatusFor(issue.getStatus().getId()))
                 .setPriority(issue.getPriority() != null ? IssuePriority.fromName(issue.getPriority().getName()): null)
                 .setSprint(getPriorSprint(getField(issue, JiraIssueFields.SPRINT).get()))
-                .setType(issue.getIssueType().getName())
                 .setUpdatedDate(issue.getUpdateDate().toDate())
                 .setProject(issue.getProject() == null ? null :
                         new ProjectDTO()
