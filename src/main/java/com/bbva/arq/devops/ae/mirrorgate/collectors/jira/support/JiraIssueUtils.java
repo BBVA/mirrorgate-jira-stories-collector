@@ -258,8 +258,8 @@ public class JiraIssueUtils {
                 .setParentId(getParentIssueId(issue))
                 //Why create JiraIssueFields with an attached class type when we have to pass it in this method?
                 .setEstimate(getField(issue, JiraIssueFields.STORY_POINTS, Double.class).get())
-                .setType(issueTypeMapService.getIssueTypeFor(issue.getIssueType().getId()))
-                .setStatus(statusMapService.getStatusFor(issue.getStatus().getId()))
+                .setType(issueTypeMapService.getIssueTypeFor(issue.getIssueType()))
+                .setStatus(statusMapService.getStatusFor(issue.getStatus()))
                 .setPriority(issue.getPriority() != null ? IssuePriority.fromName(issue.getPriority().getName()): null)
                 .setSprint(getPriorSprint(getField(issue, JiraIssueFields.SPRINT).get()))
                 .setUpdatedDate(issue.getUpdateDate().toDate())

@@ -20,6 +20,7 @@ package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service;
  * Created by alfonso on 26/05/17.
  */
 
+import com.atlassian.jira.rest.client.api.domain.Status;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config;
 import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssueStatus;
 import org.slf4j.Logger;
@@ -104,10 +105,10 @@ public class JiraStatusMapServiceImpl implements StatusMapService {
     }
 
     @Override
-    public IssueStatus getStatusFor(Long id) {
-        IssueStatus issueStatus = getStatusMappings().get(id);
+    public IssueStatus getStatusFor(Status status) {
+        IssueStatus issueStatus = getStatusMappings().get(status.getId());
         if(issueStatus == null) {
-            LOGGER.warn("IssueStatus not found for {}", id);
+            LOGGER.warn("IssueStatus not found for {} with id {}", status.getName(), status.getId());
         }
         return issueStatus;
     }
