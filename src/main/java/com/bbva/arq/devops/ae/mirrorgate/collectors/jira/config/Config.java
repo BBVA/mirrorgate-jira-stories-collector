@@ -25,6 +25,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssueStatus;
 import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssueType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -43,6 +44,7 @@ public class Config {
 
     public static final String MIRRORGATE_REST_TEMPLATE = "MirrorGateRestTemplate";
     public static final String JIRA_REST_TEMPLATE = "JiraRestTemplate";
+    public static final String JIRA_STATUS_MAPPING = "JiraStatusMapping";
     public static final String JIRA_TYPES_MAPPING = "JiraTypeMapping";
     public static final String JIRA_TYPES = "JiraTypes";
 
@@ -78,6 +80,21 @@ public class Config {
 
     @Value("#{'${jira.types.mappings.task}'.split(',')}")
     private List<String> taskTypes;
+
+    @Value("#{'${jira.status.mappings.backlog}'.split(',')}")
+    private List<String> backlogStatus;
+
+    @Value("#{'${jira.status.mappings.impeded}'.split(',')}")
+    private List<String> impededStatus;
+
+    @Value("#{'${jira.status.mappings.inProgress}'.split(',')}")
+    private List<String> inProgressStatus;
+
+    @Value("#{'${jira.status.mappings.done}'.split(',')}")
+    private List<String> doneStatus;
+
+    @Value("#{'${jira.status.mappings.waiting}'.split(',')}")
+    private List<String> waitingStatus;
 
     @Bean
     public synchronized JiraRestClient getJiraRestClient() {
@@ -154,6 +171,20 @@ public class Config {
         all.addAll(epicTypes.stream().filter((s) -> s.length() > 0).collect(Collectors.toList()));
 
         return String.join(",", all);
+    }
+
+    @Bean(JIRA_STATUS_MAPPING)
+    public Map<String, IssueStatus> getJiraStatusMapping() {
+        Map<String, IssueStatus> issueStatusDefaults = new HashMap<>(10);
+
+        backlogStatus.forEach((t) -> issueStatusDefaults.put(t, IssueStatus.BACKLOG));
+        impededStatus.forEach((t) -> issueStatusDefaults.put(t, IssueStatus.IMPEDED));
+        inProgressStatus.forEach((t) -> issueStatusDefaults.put(t, IssueStatus.IN_PROGRESS));
+        doneStatus.forEach((t) -> issueStatusDefaults.put(t, IssueStatus.DONE));
+        waitingStatus.forEach((t) -> issueStatusDefaults.put(t, IssueStatus.WAITING));
+
+        return issueStatusDefaults;
+
     }
 
     @Bean
