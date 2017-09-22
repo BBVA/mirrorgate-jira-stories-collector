@@ -77,7 +77,7 @@ public class JiraStatusMapServiceImpl implements StatusMapService {
             return value;
         }
         value = issueStatusMapping.get(getField(category, "key"));
-        return value;
+        return value != null ? value : IssueStatus.BACKLOG;
     }
 
     private static String getName(Object map) {
