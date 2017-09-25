@@ -20,14 +20,17 @@ package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service;
  * Created by alfonso on 26/05/17.
  */
 
+import com.atlassian.jira.rest.client.api.MetadataRestClient;
 import com.atlassian.jira.rest.client.api.domain.Status;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config;
 import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssueStatus;
+import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssueType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -48,32 +51,33 @@ public class JiraStatusMapServiceImpl implements StatusMapService {
     @Value("${jira.url}")
     private String jiraUrl;
 
+    private Map<String, IssueStatus> issueStatusMapping;
+
     private Map<Long, IssueStatus> statusCache;
 
-    //TODO: Allow configurable Mappings
-    private static final Map<String, IssueStatus> STATUS_DEFAULTS = new HashMap<String, IssueStatus>(){{
-        put("To Do", IssueStatus.BACKLOG);
-        put("Blocked", IssueStatus.IMPEDED);
-        put("In Progress", IssueStatus.IN_PROGRESS);
-        put("Done", IssueStatus.DONE);
-        put("Waiting", IssueStatus.WAITING);
-        put("new", IssueStatus.BACKLOG);
-        put("indeterminate", IssueStatus.IN_PROGRESS);
-        put("done", IssueStatus.DONE);
-    }};
+    @Autowired
+    public JiraStatusMapServiceImpl(
+            @Qualifier(Config.JIRA_REST_TEMPLATE)
+                    RestTemplate restTemplate,
+            @Qualifier(Config.JIRA_STATUS_MAPPING)
+                    Map<String, IssueStatus> issueStatusMapping
+    ) {
+        this.restTemplate = restTemplate;
+        this.issueStatusMapping = issueStatusMapping;
+    }
 
-    private static IssueStatus getStatus(Object status) {
-        IssueStatus value = STATUS_DEFAULTS.get(getName(status));
+    private IssueStatus getStatus(Object status) {
+        IssueStatus value = issueStatusMapping.get(getName(status));
         Object category = ((Map) status).get("statusCategory");
         if(value != null) {
             return value;
         }
-        value = STATUS_DEFAULTS.get(getName(category));
+        value = issueStatusMapping.get(getName(category));
         if(value != null) {
             return value;
         }
-        value = STATUS_DEFAULTS.get(getField(category, "key"));
-        return value;
+        value = issueStatusMapping.get(getField(category, "key"));
+        return value != null ? value : IssueStatus.BACKLOG;
     }
 
     private static String getName(Object map) {
@@ -82,13 +86,6 @@ public class JiraStatusMapServiceImpl implements StatusMapService {
 
     private static String getField(Object map, String field) {
         return (String)((Map) map).get(field);
-    }
-
-    @Autowired
-    public JiraStatusMapServiceImpl(
-            @Qualifier(Config.JIRA_REST_TEMPLATE) RestTemplate restTemplate
-    ) {
-        this.restTemplate = restTemplate;
     }
 
     private synchronized Map<Long, IssueStatus> getStatusMappings() {
