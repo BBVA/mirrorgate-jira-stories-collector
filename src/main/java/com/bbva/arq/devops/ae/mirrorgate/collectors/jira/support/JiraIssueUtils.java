@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -64,6 +65,8 @@ public class JiraIssueUtils {
 
     private IssueTypeMapService issueTypeMapService;
 
+    @Value("${jira.url}")
+    private String jiraUrl;
 
     @Autowired
     public JiraIssueUtils(
@@ -269,7 +272,9 @@ public class JiraIssueUtils {
                                 .setName(issue.getProject().getName())
                                 .setKey(issue.getProject().getKey())
                 )
-                .setKeywords(buildKeywords(issue));
+                .setKeywords(buildKeywords(issue))
+                .setUrl(jiraUrl + "/browse/" + issue.getKey())
+                ;
     }
 
     public static class JiraIssueField<T>{

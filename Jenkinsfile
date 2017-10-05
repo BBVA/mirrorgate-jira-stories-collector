@@ -22,7 +22,7 @@ node('global') {
 
     stage('Build jar file') {
         sh """
-            ./gradlew clean build
+            ./gradlew clean build --refresh-dependencies
         """
     }
 
