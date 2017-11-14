@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2017 Banco Bilbao Vizcaya Argentaria, S.A.
  *
@@ -28,9 +29,11 @@ import com.bbva.arq.devops.ae.mirrorgate.core.dto.ProjectDTO;
 import com.bbva.arq.devops.ae.mirrorgate.core.dto.SprintDTO;
 import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssuePriority;
 import com.bbva.arq.devops.ae.mirrorgate.core.utils.SprintStatus;
-import java.lang.reflect.Array;
-import java.net.URI;
-import java.util.function.Function;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -43,27 +46,18 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-/**
- * Created by alfonso on 26/05/17.
- */
-
 @Component
 public class JiraIssueUtils {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(JiraIssueUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JiraIssueUtils.class);
 
-    private List<String> keywordsFields;
+    private final List<String> keywordsFields;
 
-    private Map<JiraIssueFields, String> jiraFields;
+    private final Map<JiraIssueFields, String> jiraFields;
 
-    private StatusMapService statusMapService;
+    private final StatusMapService statusMapService;
 
-    private IssueTypeMapService issueTypeMapService;
+    private final IssueTypeMapService issueTypeMapService;
 
     @Value("${jira.url}")
     private String jiraUrl;
@@ -219,36 +213,25 @@ public class JiraIssueUtils {
         return keywords;
     }
 
-    public String getParentIssueKey(Issue issue){
-        Optional<IssueLink> issueLink = getInboundLinks(issue);
-
-        String parentKey = null;
-        if(issueLink.isPresent()){
-            parentKey = issueLink.map(IssueLink::getTargetIssueKey).get();
-        }
-        return parentKey;
+    public List<String> getParentIssueKey(Issue issue) {
+        return getInboundLinks(issue)
+                .map(IssueLink::getTargetIssueKey)
+                .collect(Collectors.toList());
     }
 
-    public String getParentIssueId(Issue issue){
-        Optional<IssueLink> issueLink = getInboundLinks(issue);
-
-        Optional<URI> uri = issueLink.map(IssueLink::getTargetIssueUri);
-
-        String parentIssueId = null;
-        if(uri.isPresent()){
-            String[] pathParts = uri.get().getPath().split("/");
-            parentIssueId = pathParts[pathParts.length-1];
-        }
-
-        return parentIssueId;
+    public List<String> getParentIssueId(Issue issue) {
+        return getInboundLinks(issue)
+                .map(link -> {
+                    String[] pathParts = link.getTargetIssueUri().getPath().split("/");
+                    return pathParts[pathParts.length - 1];
+                })
+                .collect(Collectors.toList());
     }
 
-    private Optional<IssueLink> getInboundLinks(Issue issue){
-
+    private Stream<IssueLink> getInboundLinks(Issue issue) {
         return StreamSupport
-            .stream(issue.getIssueLinks().spliterator(), false)
-            .filter(i -> i.getIssueLinkType().getDirection().equals(Direction.INBOUND))
-            .findFirst();
+                .stream(issue.getIssueLinks().spliterator(), false)
+                .filter(i -> i.getIssueLinkType().getDirection().equals(Direction.INBOUND));
     }
 
     public IssueDTO map(Issue issue) {
