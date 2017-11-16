@@ -28,9 +28,8 @@ import com.bbva.arq.devops.ae.mirrorgate.core.dto.ProjectDTO;
 import com.bbva.arq.devops.ae.mirrorgate.core.dto.SprintDTO;
 import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssuePriority;
 import com.bbva.arq.devops.ae.mirrorgate.core.utils.SprintStatus;
-import java.lang.reflect.Array;
+
 import java.net.URI;
-import java.util.function.Function;
 import java.util.stream.StreamSupport;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
@@ -202,21 +201,29 @@ public class JiraIssueUtils {
                 .filter((v) -> v != null)
                 .map(IssueField::getValue)
                 .filter((v) -> v != null)
-                .map((v) -> {
-                    if(v instanceof JSONObject) {
-                        try {
-                            return ((JSONObject) v).get("value");
-                        } catch (JSONException e) {
-                            LOGGER.error("Error parsing customfield: " + v, e);
-                        }
-                    }
-                    return v;
-                })
+                .flatMap((v) ->
+                    getCustomFieldValue(v, new ArrayList<>(2)).stream()
+                )
                 .filter((v) -> v != null)
                 .map(Object::toString)
                 .collect(Collectors.toList()));
 
         return keywords;
+    }
+
+    private static List<Object> getCustomFieldValue(Object v, List<Object> result) {
+        if(v instanceof JSONObject) {
+            try {
+                result.add(((JSONObject) v).get("value"));
+            } catch (JSONException e) {
+                LOGGER.error("Error parsing customfield: " + v, e);
+            }
+            try {
+                getCustomFieldValue(((JSONObject) v).get("child"), result);
+            } catch (JSONException e) {
+            }
+        }
+        return result;
     }
 
     public String getParentIssueKey(Issue issue){
