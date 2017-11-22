@@ -196,16 +196,9 @@ public class JiraIssueUtils {
                 .filter((v) -> v != null)
                 .map(IssueField::getValue)
                 .filter((v) -> v != null)
-                .map((v) -> {
-                    if(v instanceof JSONObject) {
-                        try {
-                            return ((JSONObject) v).get("value");
-                        } catch (JSONException e) {
-                            LOGGER.error("Error parsing customfield: " + v, e);
-                        }
-                    }
-                    return v;
-                })
+                .flatMap((v) ->
+                    getCustomFieldValue(v, new ArrayList<>(2)).stream()
+                )
                 .filter((v) -> v != null)
                 .map(Object::toString)
                 .collect(Collectors.toList()));
@@ -217,6 +210,21 @@ public class JiraIssueUtils {
         return getInboundLinks(issue)
                 .map(IssueLink::getTargetIssueKey)
                 .collect(Collectors.toList());
+    }
+
+    private static List<Object> getCustomFieldValue(Object v, List<Object> result) {
+        if(v instanceof JSONObject) {
+            try {
+                result.add(((JSONObject) v).get("value"));
+            } catch (JSONException e) {
+                LOGGER.error("Error parsing customfield: " + v, e);
+            }
+            try {
+                getCustomFieldValue(((JSONObject) v).get("child"), result);
+            } catch (JSONException e) {
+            }
+        }
+        return result;
     }
 
     public List<String> getParentIssueId(Issue issue) {
