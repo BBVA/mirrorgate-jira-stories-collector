@@ -20,12 +20,12 @@ sourceCompatibility = 1.8
 repositories {
 	mavenCentral()
 	maven {
-		name "atlassian-public"
-		url "https://m2proxy.atlassian.com/repository/public"
-	}
-	maven {
 		name "sonatype-oss"
 		url "https://oss.sonatype.org/content/repositories/snapshots"
+	}
+	maven {
+		name "atlassian-public"
+		url "https://m2proxy.atlassian.com/repository/public"
 	}
 }
 

@@ -16,16 +16,16 @@
 
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service;
 
+import static com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config.JIRA_TYPES;
+
 import com.atlassian.jira.rest.client.api.RestClientException;
 import com.atlassian.jira.rest.client.api.SearchRestClient;
 import com.atlassian.jira.rest.client.api.domain.SearchResult;
 import com.atlassian.util.concurrent.Promise;
-import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Counter;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueUtils;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Pageable;
 import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,8 +38,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-
-import static com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config.JIRA_TYPES;
 
 /**
  * Created by alfonso on 26/05/17.
