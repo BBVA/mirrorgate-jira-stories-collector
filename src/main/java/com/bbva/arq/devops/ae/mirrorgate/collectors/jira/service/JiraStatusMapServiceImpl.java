@@ -20,32 +20,26 @@ package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service;
  * Created by alfonso on 26/05/17.
  */
 
-import com.atlassian.jira.rest.client.api.MetadataRestClient;
 import com.atlassian.jira.rest.client.api.domain.Status;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config;
 import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssueStatus;
-import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssueType;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
 public class JiraStatusMapServiceImpl implements StatusMapService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JiraStatusMapServiceImpl.class);
 
-    RestTemplate restTemplate;
     private static final String SERVER_URI="/rest/api/2/status/";
 
     @Value("${jira.url}")
@@ -54,6 +48,8 @@ public class JiraStatusMapServiceImpl implements StatusMapService {
     private Map<String, IssueStatus> issueStatusMapping;
 
     private Map<Long, IssueStatus> statusCache;
+
+    private RestTemplate restTemplate;
 
     @Autowired
     public JiraStatusMapServiceImpl(

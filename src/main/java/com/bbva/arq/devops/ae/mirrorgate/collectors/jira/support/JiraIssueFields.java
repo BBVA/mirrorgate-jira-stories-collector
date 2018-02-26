@@ -17,6 +17,7 @@
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support;
 
 import java.util.List;
+import org.codehaus.jettison.json.JSONObject;
 
 /**
  * Created by alfonso on 26/05/17.
@@ -28,6 +29,7 @@ public class JiraIssueFields<T> {
     public static final JiraIssueFields KEYWORDS = new JiraIssueFields(String.class);
     //Can a feature be part of multiple PIs?
     public static final JiraIssueFields PI = new JiraIssueFields(List.class);
+    public static final JiraIssueFields TEAM_NAME = new JiraIssueFields(JSONObject.class);
 
     public Class<T> type;
 

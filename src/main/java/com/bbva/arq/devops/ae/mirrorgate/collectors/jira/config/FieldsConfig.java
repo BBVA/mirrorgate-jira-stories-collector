@@ -49,6 +49,9 @@ public class FieldsConfig {
     @Value("${jira.fields.pi}")
     private String piField;
 
+    @Value("${jira.fields.teamName}")
+    private String teamName;
+
     @Bean(JIRA_FIELDS_BEAN)
     public Map<JiraIssueFields, String> getFieldIds() {
         Map<JiraIssueFields, String> fields = new HashMap<>();
@@ -57,6 +60,7 @@ public class FieldsConfig {
         fields.put(JiraIssueFields.SPRINT, sprintField);
         fields.put(JiraIssueFields.KEYWORDS, keywordsList);
         fields.put(JiraIssueFields.PI, piField);
+        fields.put(JiraIssueFields.TEAM_NAME, teamName);
 
         return fields;
     }

@@ -76,7 +76,34 @@ public class JiraIssueUtils {
         this.issueTypeMapService = issueTypeMapService;
     }
 
-    public static Object getFieldValue(Issue issue, String field) {
+    public IssueDTO map(Issue issue) {
+        return new IssueDTO()
+            .setId(issue.getId())
+            .setName(issue.getSummary())
+            .setJiraKey(issue.getKey())
+            .setPiNames(objectToStringList(getField(issue, JiraIssueFields.PI, List.class).get()))
+            .setParentKey(getParentIssueKey(issue))
+            .setParentId(getParentIssueId(issue))
+            //Why create JiraIssueFields with an attached class type when we have to pass it in this method?
+            .setEstimate(getField(issue, JiraIssueFields.STORY_POINTS, Double.class).get())
+            .setType(issueTypeMapService.getIssueTypeFor(issue.getIssueType()))
+            .setStatus(statusMapService.getStatusFor(issue.getStatus()))
+            .setPriority(issue.getPriority() != null ? IssuePriority.fromName(issue.getPriority().getName()): null)
+            .setSprint(getPriorSprint(getField(issue, JiraIssueFields.SPRINT).get()))
+            .setUpdatedDate(issue.getUpdateDate().toDate())
+            .setProject(issue.getProject() == null ? null :
+                new ProjectDTO()
+                    .setId(issue.getProject().getId())
+                    .setName(issue.getProject().getName())
+                    .setKey(issue.getProject().getKey())
+            )
+            .setKeywords(buildKeywords(issue))
+            .setUrl(jiraUrl + "/browse/" + issue.getKey())
+            .setTeamName(getTeamName(getField(issue, JiraIssueFields.TEAM_NAME, JSONObject.class).get()))
+            ;
+    }
+
+    private static Object getFieldValue(Issue issue, String field) {
         Object out = null;
         IssueField iField = issue.getField(field);
 
@@ -87,11 +114,11 @@ public class JiraIssueUtils {
         return out;
     }
 
-    public JiraIssueField getField(Issue issue, JiraIssueFields outputType) {
+    private JiraIssueField getField(Issue issue, JiraIssueFields outputType) {
         return new JiraIssueField<>(getFieldValue(issue, jiraFields.get(outputType)));
     }
 
-    public <T> JiraIssueField<T> getField(Issue issue, JiraIssueFields field, Class<T> outputType) {
+    private <T> JiraIssueField<T> getField(Issue issue, JiraIssueFields field, Class<T> outputType) {
         return new JiraIssueField<>(getFieldValue(issue, jiraFields.get(field)));
     }
 
@@ -109,7 +136,7 @@ public class JiraIssueUtils {
         return null;
     }
 
-    public List<String> objectToStringList(Object o){
+    private List<String> objectToStringList(Object o){
         if(o == null) {
             return null;
         }
@@ -134,7 +161,7 @@ public class JiraIssueUtils {
         return stringList;
     }
 
-    public SprintDTO getPriorSprint(Object o) {
+    private SprintDTO getPriorSprint(Object o) {
         if(o == null) {
             return null;
         }
@@ -152,7 +179,7 @@ public class JiraIssueUtils {
         return latest;
     }
 
-    public List<SprintDTO> getSprintList(List<String> data) {
+    private List<SprintDTO> getSprintList(List<String> data) {
         return data == null ?
                 null:
                 data.stream().map(this::parseSprint).collect(Collectors.toList());
@@ -178,7 +205,7 @@ public class JiraIssueUtils {
                 .setCompleteDate(parse(fieldsAndValue.get("completeDate"),Date.class));
     }
 
-    public List<String> buildKeywords(Issue issue) {
+    private List<String> buildKeywords(Issue issue) {
         List<String> keywords = new ArrayList<>();
 
         if(issue.getProject() != null) {
@@ -206,7 +233,7 @@ public class JiraIssueUtils {
         return keywords;
     }
 
-    public List<String> getParentIssueKey(Issue issue) {
+    private List<String> getParentIssueKey(Issue issue) {
         return getInboundLinks(issue)
                 .map(IssueLink::getTargetIssueKey)
                 .collect(Collectors.toList());
@@ -227,7 +254,7 @@ public class JiraIssueUtils {
         return result;
     }
 
-    public List<String> getParentIssueId(Issue issue) {
+    private List<String> getParentIssueId(Issue issue) {
         return getInboundLinks(issue)
                 .map(link -> {
                     String[] pathParts = link.getTargetIssueUri().getPath().split("/");
@@ -242,30 +269,19 @@ public class JiraIssueUtils {
                 .filter(i -> i.getIssueLinkType().getDirection().equals(Direction.INBOUND));
     }
 
-    public IssueDTO map(Issue issue) {
-        return new IssueDTO()
-                .setId(issue.getId())
-                .setName(issue.getSummary())
-                .setJiraKey(issue.getKey())
-                .setPiNames(objectToStringList(getField(issue, JiraIssueFields.PI, List.class).get()))
-                .setParentKey(getParentIssueKey(issue))
-                .setParentId(getParentIssueId(issue))
-                //Why create JiraIssueFields with an attached class type when we have to pass it in this method?
-                .setEstimate(getField(issue, JiraIssueFields.STORY_POINTS, Double.class).get())
-                .setType(issueTypeMapService.getIssueTypeFor(issue.getIssueType()))
-                .setStatus(statusMapService.getStatusFor(issue.getStatus()))
-                .setPriority(issue.getPriority() != null ? IssuePriority.fromName(issue.getPriority().getName()): null)
-                .setSprint(getPriorSprint(getField(issue, JiraIssueFields.SPRINT).get()))
-                .setUpdatedDate(issue.getUpdateDate().toDate())
-                .setProject(issue.getProject() == null ? null :
-                        new ProjectDTO()
-                                .setId(issue.getProject().getId())
-                                .setName(issue.getProject().getName())
-                                .setKey(issue.getProject().getKey())
-                )
-                .setKeywords(buildKeywords(issue))
-                .setUrl(jiraUrl + "/browse/" + issue.getKey())
-                ;
+    private String getTeamName(JSONObject teamNameObject){
+
+        String teamName = null;
+
+        if(teamNameObject != null) {
+            try {
+                teamName = teamNameObject.getString("value");
+            } catch (JSONException e) {
+                LOGGER.error("Error while parsing team name field", e);
+            }
+        }
+
+        return teamName;
     }
 
     public static class JiraIssueField<T>{
