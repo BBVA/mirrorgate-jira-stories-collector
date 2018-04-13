@@ -16,10 +16,13 @@
 
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.SprintDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service.IssueTypeMapService;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service.StatusMapService;
-import com.bbva.arq.devops.ae.mirrorgate.core.dto.SprintDTO;
-import com.bbva.arq.devops.ae.mirrorgate.core.utils.SprintStatus;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.joda.time.DateTime;
@@ -30,15 +33,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.Arrays;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
-/**
- * Created by alfonso on 28/06/17.
- */
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -129,6 +123,5 @@ public class JiraIssueUtilsTest {
         assertEquals(out, null);
 
     }
-
 
 }

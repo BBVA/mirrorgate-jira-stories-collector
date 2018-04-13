@@ -14,16 +14,10 @@
  * limitations under the License.
  */
 
-package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service;
+package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support;
 
-import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.IssueDTO;
-import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Pageable;
-import java.util.List;
-
-public interface IssuesService {
-
-    Pageable<IssueDTO> getRecentIssues();
-
-    Pageable<IssueDTO> getById(List<Long> ids);
-
+public enum SprintStatus {
+    ACTIVE,
+    CLOSED,
+    FUTURE
 }

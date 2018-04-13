@@ -17,13 +17,8 @@
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service;
 
 import com.atlassian.jira.rest.client.api.domain.Status;
-import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssueStatus;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.IssueStatus;
 
-import java.util.Map;
-
-/**
- * Created by alfonso on 26/05/17.
- */
 public interface StatusMapService {
 
     IssueStatus getStatusFor(Status status);

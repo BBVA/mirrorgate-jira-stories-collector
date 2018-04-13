@@ -17,8 +17,10 @@
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.api;
 
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config;
-import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
-import com.bbva.arq.devops.ae.mirrorgate.core.dto.SprintDTO;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.IssueDTO;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.SprintDTO;
+import java.util.Arrays;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,12 +33,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Arrays;
-import java.util.List;
-
-/**
- * Created by alfonso on 26/05/17.
- */
 @Component
 public class SprintService {
 
@@ -58,7 +54,7 @@ public class SprintService {
     RestTemplate restTemplate;
 
     public ResponseEntity<List> sendIssues(List<IssueDTO> issues) {
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.set("collectorId", collectorId);
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRROR_GATE_SEND_ISSUES_ENDPOINT).queryParams(params);
@@ -67,7 +63,7 @@ public class SprintService {
     }
 
     public void deleteIssue(Long issueId) {
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.set("collectorId", collectorId);
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRROR_GATE_HANDLE_ISSUE_ENDPOINT).queryParams(params);
@@ -76,7 +72,7 @@ public class SprintService {
     }
 
     public List<SprintDTO> getSprintSamples() {
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.set("collectorId", collectorId);
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRROR_GATE_GET_SPRINT_SAMPLE_ENDPOINT).queryParams(params);
@@ -86,7 +82,7 @@ public class SprintService {
 
     public SprintDTO getSprint(String name) {
         try{
-            MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+            MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
             params.set("collectorId", collectorId);
 
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRROR_GATE_GET_SPRINT_ISSUES_ENDPOINT).queryParams(params);

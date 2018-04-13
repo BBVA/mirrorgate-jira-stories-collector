@@ -18,21 +18,17 @@ package com.bbva.arq.devops.ae.mirrorgate.collectors.jira;
 
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.api.CollectorService;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.api.SprintService;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.IssueDTO;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.SprintDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service.IssuesService;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Pageable;
-import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
-import com.bbva.arq.devops.ae.mirrorgate.core.dto.SprintDTO;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-/**
- * Created by alfonso on 26/05/17.
- */
 @Component
 public class Main implements Runnable {
 
