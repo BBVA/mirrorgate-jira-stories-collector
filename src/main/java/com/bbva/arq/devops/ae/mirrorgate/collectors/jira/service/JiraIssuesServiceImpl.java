@@ -22,10 +22,10 @@ import com.atlassian.jira.rest.client.api.RestClientException;
 import com.atlassian.jira.rest.client.api.SearchRestClient;
 import com.atlassian.jira.rest.client.api.domain.SearchResult;
 import com.atlassian.util.concurrent.Promise;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.IssueDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Counter;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueUtils;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Pageable;
-import com.bbva.arq.devops.ae.mirrorgate.core.dto.IssueDTO;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,9 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-/**
- * Created by alfonso on 26/05/17.
- */
 @Component
 public class JiraIssuesServiceImpl implements IssuesService {
 
@@ -51,11 +48,11 @@ public class JiraIssuesServiceImpl implements IssuesService {
     private static final String ISSUES_BY_ID_QUERY_PATTERN="id IN (%s)";
     private static final int PAGE_SIZE=10;
 
-    private String issueTypes;
+    private final String issueTypes;
 
-    private SearchRestClient client;
-    private CollectorStatusService collectorStatusService;
-    private JiraIssueUtils utils;
+    private final SearchRestClient client;
+    private final CollectorStatusService collectorStatusService;
+    private final JiraIssueUtils utils;
     private final TimeZone jiraTimeZone;
 
     @Autowired

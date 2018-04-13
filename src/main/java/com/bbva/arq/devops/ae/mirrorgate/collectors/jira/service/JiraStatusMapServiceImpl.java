@@ -16,13 +16,9 @@
 
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service;
 
-/**
- * Created by alfonso on 26/05/17.
- */
-
 import com.atlassian.jira.rest.client.api.domain.Status;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config;
-import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssueStatus;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.IssueStatus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,11 +41,11 @@ public class JiraStatusMapServiceImpl implements StatusMapService {
     @Value("${jira.url}")
     private String jiraUrl;
 
-    private Map<String, IssueStatus> issueStatusMapping;
+    private final Map<String, IssueStatus> issueStatusMapping;
 
     private Map<Long, IssueStatus> statusCache;
 
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
     @Autowired
     public JiraStatusMapServiceImpl(

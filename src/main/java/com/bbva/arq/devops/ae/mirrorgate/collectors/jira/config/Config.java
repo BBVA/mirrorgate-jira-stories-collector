@@ -20,22 +20,17 @@ import com.atlassian.jira.rest.client.api.JiraRestClient;
 import com.atlassian.jira.rest.client.api.MetadataRestClient;
 import com.atlassian.jira.rest.client.api.SearchRestClient;
 import com.atlassian.jira.rest.client.internal.async.AsynchronousJiraRestClientFactory;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.IssueStatus;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.IssueType;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssueStatus;
-import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssueType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.client.support.BasicAuthorizationInterceptor;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
-
-/**
- * Created by alfonso on 26/05/17.
- */
 
 @org.springframework.context.annotation.Configuration
 public class Config {

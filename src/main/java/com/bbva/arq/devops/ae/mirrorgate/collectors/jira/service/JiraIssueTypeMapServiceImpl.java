@@ -4,7 +4,7 @@ import com.atlassian.jira.rest.client.api.MetadataRestClient;
 import com.atlassian.util.concurrent.Promise;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.exception.IssueMapException;
-import com.bbva.arq.devops.ae.mirrorgate.core.utils.IssueType;
+import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.IssueType;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -22,11 +22,11 @@ public class JiraIssueTypeMapServiceImpl implements IssueTypeMapService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JiraStatusMapServiceImpl.class);
 
-    private Map<Long, String> issueTypeCache = new HashMap<>();
+    private final Map<Long, String> issueTypeCache = new HashMap<>();
 
-    private Map<String, IssueType> issueTypeMapping;
+    private final Map<String, IssueType> issueTypeMapping;
 
-    private MetadataRestClient metadataRestClient;
+    private final MetadataRestClient metadataRestClient;
 
     @Autowired
     public JiraIssueTypeMapServiceImpl(

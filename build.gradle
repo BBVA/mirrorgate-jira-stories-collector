@@ -20,10 +20,6 @@ sourceCompatibility = 1.8
 repositories {
 	mavenCentral()
 	maven {
-		name "sonatype-oss"
-		url "https://oss.sonatype.org/content/repositories/snapshots"
-	}
-	maven {
 		name "atlassian-public"
 		url "https://m2proxy.atlassian.com/repository/public"
 	}
@@ -37,9 +33,8 @@ dependencies {
 	compile('com.atlassian.jira:jira-rest-java-client-core:4.0.0')
 	compile('com.atlassian.fugue:fugue:2.6.1')
 	compile('org.springframework:spring-web')
-	compile('com.bbva.arq.devops.ae.mirrorgate:mirrorgate-core:0.0.1-SNAPSHOT')
 	compile('org.hibernate:hibernate-validator:5.3.5.Final')
-    compile("org.springframework.boot:spring-boot-starter-actuator")
+        compile("org.springframework.boot:spring-boot-starter-actuator")
 
 	compile (
 			'com.amazonaws:aws-lambda-java-core:1.1.0',
