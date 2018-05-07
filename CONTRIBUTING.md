@@ -184,6 +184,6 @@ reference GitHub issues that this commit **Closes**.
 A detailed explanation can be found in this [document][commit-message-format].
 
 [commit-message-format]: https://docs.google.com/document/d/1QrDFcIiPjSLDn3EL15IJygNPiHORgU1_OOAqWjiDU5Y/edit#
-[github]: https://github.com/bbva/mirrorgate-jenkins-builds-collector
+[github]: https://github.com/bbva/mirrorgate-jira-stories-collector
 
 **credit**: this file is based on the [CONTRIBUTING](https://github.com/angular/angular/blob/master/CONTRIBUTING.md) file of the angular team. Thank you guys.
