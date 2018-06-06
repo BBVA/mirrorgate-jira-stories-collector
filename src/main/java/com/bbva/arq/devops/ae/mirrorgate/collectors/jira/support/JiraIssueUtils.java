@@ -147,8 +147,12 @@ public class JiraIssueUtils {
 
             for (int i = 0; i < array.length(); i++) {
                 try {
-                    stringList.add((String) array.get(i));
-                } catch (JSONException e) {
+                    if (array.get(i) instanceof JSONObject) {
+                        stringList.add(array.get(i).toString());
+                    } else {
+                        stringList.add((String) array.get(i));
+                    }
+                } catch (Exception e) {
                     LOGGER.error("Error parsing sprint field", e);
                 }
             }
