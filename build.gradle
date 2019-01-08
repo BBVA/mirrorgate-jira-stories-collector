@@ -1,18 +1,23 @@
 buildscript {
 	ext {
-		springBootVersion = '1.5.3.RELEASE'
+		springBootVersion = '2.1.1.RELEASE'
 	}
 	repositories {
 		mavenCentral()
+		jcenter()
 	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath "com.github.ben-manes:gradle-versions-plugin:0.20.0"
 	}
 }
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: "com.github.ben-manes.versions"
+
 
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
@@ -27,18 +32,21 @@ repositories {
 
 
 dependencies {
-	compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.8.8'
-	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.8'
+	compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.8'
+	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.8'
+
 	compile('org.springframework.boot:spring-boot-starter-web')
+	compile("org.springframework.boot:spring-boot-starter-actuator")
+	compile('org.springframework:spring-web')
+
 	compile('com.atlassian.jira:jira-rest-java-client-core:4.0.0')
 	compile('com.atlassian.fugue:fugue:2.6.1')
-	compile('org.springframework:spring-web')
-	compile('org.hibernate:hibernate-validator:5.3.5.Final')
-        compile("org.springframework.boot:spring-boot-starter-actuator")
+	
+	compile('org.hibernate:hibernate-validator:6.0.14.Final')
 
 	compile (
-			'com.amazonaws:aws-lambda-java-core:1.1.0',
-			'com.amazonaws:aws-lambda-java-events:1.1.0'
+			'com.amazonaws:aws-lambda-java-core:1.2.0',
+			'com.amazonaws:aws-lambda-java-events:2.2.5'
 	)
 
 	testCompile('org.springframework.boot:spring-boot-starter-test')
