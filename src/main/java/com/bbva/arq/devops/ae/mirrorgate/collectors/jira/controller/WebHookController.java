@@ -24,6 +24,7 @@ import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.Main;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.IssueDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueUtils;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import org.codehaus.jettison.json.JSONException;
@@ -63,9 +64,9 @@ public class WebHookController {
             return name;
         }
 
-        public static final JiraEvent fromName(String name) {
+        static JiraEvent fromName(String name) {
             Optional<JiraEvent> event = Arrays.stream(JiraEvent.values()).filter((e) -> e.getName().equals(name)).findFirst();
-            return event.isPresent() ? event.get() : Unknown;
+            return event.orElse(Unknown);
         }
     }
 
@@ -150,7 +151,7 @@ public class WebHookController {
         IssueDTO issueBean = utils.map(getParser().parse(issue));
 
         if(issueBean.getType() != null) {
-            main.updateIssuesOnDemand(Arrays.asList(issueBean));
+            main.updateIssuesOnDemand(Collections.singletonList(issueBean));
         }
     }
 

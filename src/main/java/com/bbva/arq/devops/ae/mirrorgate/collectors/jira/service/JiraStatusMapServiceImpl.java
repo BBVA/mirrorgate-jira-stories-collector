@@ -22,6 +22,7 @@ import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.IssueStatus;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,9 +85,9 @@ public class JiraStatusMapServiceImpl implements StatusMapService {
 
         if(statusCache == null) {
             List jsa = restTemplate.getForObject(jiraUrl + SERVER_URI, ArrayList.class);
-            statusCache = (Map) jsa.stream().collect(Collectors.toMap(
+            statusCache = (Map<Long, IssueStatus>) Objects.requireNonNull(jsa).stream().collect(Collectors.toMap(
                     (status) -> Long.parseLong(getField(status, "id")),
-                    (status) -> getStatus(status)
+                    this::getStatus
             ));
         }
 

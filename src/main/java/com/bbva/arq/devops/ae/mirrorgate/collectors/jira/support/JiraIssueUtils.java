@@ -221,14 +221,14 @@ public class JiraIssueUtils {
 
         keywords.addAll(keywordsFields
                 .stream()
-                .map((f) -> issue.getField(f))
-                .filter((v) -> v != null)
+                .map(issue::getField)
+                .filter(Objects::nonNull)
                 .map(IssueField::getValue)
-                .filter((v) -> v != null)
+                .filter(Objects::nonNull)
                 .flatMap((v) ->
                     getCustomFieldValue(v, new ArrayList<>(2)).stream()
                 )
-                .filter((v) -> v != null)
+                .filter(Objects::nonNull)
                 .map(Object::toString)
                 .collect(Collectors.toList()));
 
@@ -246,11 +246,12 @@ public class JiraIssueUtils {
             try {
                 result.add(((JSONObject) v).get("value"));
             } catch (JSONException e) {
-                LOGGER.error("Error parsing customfield: " + v, e);
+                LOGGER.error("Error parsing custom field: " + v, e);
             }
             try {
                 getCustomFieldValue(((JSONObject) v).get("child"), result);
             } catch (JSONException e) {
+                LOGGER.error("Error getting custom field value: " + v, e);
             }
         }
         return result;
@@ -267,7 +268,7 @@ public class JiraIssueUtils {
 
     private Stream<IssueLink> getInboundLinks(Issue issue) {
         return StreamSupport
-                .stream(issue.getIssueLinks().spliterator(), false)
+                .stream(Objects.requireNonNull(issue.getIssueLinks()).spliterator(), false)
                 .filter(i -> i.getIssueLinkType().getDirection().equals(Direction.INBOUND));
     }
 
@@ -286,15 +287,15 @@ public class JiraIssueUtils {
         return teamName;
     }
 
-    public static class JiraIssueField<T>{
+    static class JiraIssueField<T>{
 
-        T value;
+        final T value;
 
-        protected JiraIssueField(Object value) {
+        JiraIssueField(Object value) {
             this.value = (T) value;
         }
 
-        public T get() {
+        T get() {
             return value;
         }
 

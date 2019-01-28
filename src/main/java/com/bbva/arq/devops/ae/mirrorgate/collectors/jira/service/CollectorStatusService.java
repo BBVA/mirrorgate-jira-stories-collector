@@ -18,10 +18,7 @@ package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service;
 
 import org.joda.time.DateTime;
 
-/**
- * Created by alfonso on 26/05/17.
- */
-public interface CollectorStatusService {
+interface CollectorStatusService {
 
     DateTime getLastExecutionDate();
 
