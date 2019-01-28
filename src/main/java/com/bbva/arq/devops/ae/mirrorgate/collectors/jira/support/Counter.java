@@ -16,13 +16,10 @@
 
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support;
 
-/**
- * Created by alfonso on 26/05/17.
- */
 public class Counter {
 
     private int value;
-    private int increment;
+    private final int increment;
 
     public Counter() {
         this(0,1);
@@ -32,7 +29,7 @@ public class Counter {
         this(0,increment);
     }
 
-    public Counter(int value, int increment) {
+    private Counter(int value, int increment) {
         this.value = value;
         this.increment = increment;
     }

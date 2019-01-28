@@ -26,12 +26,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
@@ -125,7 +126,7 @@ public class Config {
         RestTemplate restTemplate = new RestTemplate();
         MappingJackson2HttpMessageConverter jsonHttpMessageConverter = new MappingJackson2HttpMessageConverter();
         restTemplate.getMessageConverters().add(jsonHttpMessageConverter);
-        if(!StringUtils.isEmpty(mirrorGateUserName)) {
+        if(!StringUtils.isBlank(mirrorGateUserName) && !StringUtils.isBlank(mirrorGatePassword)) {
             restTemplate.getInterceptors().add(
                     new BasicAuthenticationInterceptor(mirrorGateUserName, mirrorGatePassword));
         }
@@ -187,7 +188,7 @@ public class Config {
     @Bean
     public TimeZone getTimeZone() {
         TimeZone tz = TimeZone.getDefault();
-        if(!StringUtils.isEmpty(jiraTimeZone)) {
+        if(!StringUtils.isBlank(jiraTimeZone)) {
             tz = TimeZone.getTimeZone(jiraTimeZone);
         }
 

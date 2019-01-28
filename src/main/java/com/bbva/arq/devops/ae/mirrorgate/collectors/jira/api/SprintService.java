@@ -21,6 +21,8 @@ import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.IssueDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.SprintDTO;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +79,7 @@ public class SprintService {
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRROR_GATE_GET_SPRINT_SAMPLE_ENDPOINT).queryParams(params);
 
-        return Arrays.asList(restTemplate.getForObject(builder.build().toUriString(), SprintDTO[].class));
+        return Arrays.asList(Objects.requireNonNull(restTemplate.getForObject(builder.build().toUriString(), SprintDTO[].class)));
     }
 
     public SprintDTO getSprint(String name) {

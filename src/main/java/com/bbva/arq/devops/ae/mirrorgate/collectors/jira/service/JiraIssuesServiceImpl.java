@@ -26,10 +26,8 @@ import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.IssueDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Counter;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueUtils;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Pageable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.TimeZone;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import org.joda.time.DateTimeZone;
@@ -131,7 +129,7 @@ public class JiraIssuesServiceImpl implements IssuesService {
                         //Falling back to per issue invocation if one was not found... Why Jira o why...
                         List<IssueDTO> result = new ArrayList<>(PAGE_SIZE);
                         for (int i = firstItem; i < counter.get(); i++) {
-                            result.addAll(getById(Arrays.asList(ids.get(i))).nextPage());
+                            result.addAll(getById(Collections.singletonList(ids.get(i))).nextPage());
                         }
                         return result;
                     }

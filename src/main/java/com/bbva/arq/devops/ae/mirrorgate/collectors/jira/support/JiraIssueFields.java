@@ -19,19 +19,16 @@ package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support;
 import java.util.List;
 import org.codehaus.jettison.json.JSONObject;
 
-/**
- * Created by alfonso on 26/05/17.
- */
 public class JiraIssueFields<T> {
 
-    public static final JiraIssueFields STORY_POINTS = new JiraIssueFields(Double.class);
-    public static final JiraIssueFields SPRINT = new JiraIssueFields(List.class);
-    public static final JiraIssueFields KEYWORDS = new JiraIssueFields(String.class);
+    public static final JiraIssueFields<Double> STORY_POINTS = new JiraIssueFields<>(Double.class);
+    public static final JiraIssueFields<List> SPRINT = new JiraIssueFields<>(List.class);
+    public static final JiraIssueFields<String> KEYWORDS = new JiraIssueFields<>(String.class);
     //Can a feature be part of multiple PIs?
-    public static final JiraIssueFields PI = new JiraIssueFields(List.class);
-    public static final JiraIssueFields TEAM_NAME = new JiraIssueFields(JSONObject.class);
+    public static final JiraIssueFields<List> PI = new JiraIssueFields<>(List.class);
+    public static final JiraIssueFields<JSONObject> TEAM_NAME = new JiraIssueFields<>(JSONObject.class);
 
-    public Class<T> type;
+    public final Class<T> type;
 
     private JiraIssueFields(Class<T> type) {
         this.type = type;

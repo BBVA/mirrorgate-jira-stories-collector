@@ -16,9 +16,6 @@
 
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.SprintDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service.IssueTypeMapService;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service.StatusMapService;
@@ -33,6 +30,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -107,20 +106,20 @@ public class JiraIssueUtilsTest {
         SprintDTO out = issueUtils.parseSprint(in);
 
         assertEquals(out.getId(), "1003");
-        assertEquals(out.getStatus(), null);
-        assertEquals(out.getName(), null);
-        assertEquals(out.getStartDate(), null);
-        assertEquals(out.getEndDate(), null);
-        assertEquals(out.getCompleteDate(), null);
+        assertNull(out.getStatus());
+        assertNull(out.getName());
+        assertNull(out.getStartDate());
+        assertNull(out.getEndDate());
+        assertNull(out.getCompleteDate());
 
     }
 
     @Test
-    public void itShouldNotResturnSprintWhenDoesntMatch() {
+    public void itShouldNotReturnSprintWhenDoesNotMatch() {
         String in = "someother.class@20d5ab81[id=1003]";
         SprintDTO out = issueUtils.parseSprint(in);
 
-        assertEquals(out, null);
+        assertNull(out);
 
     }
 

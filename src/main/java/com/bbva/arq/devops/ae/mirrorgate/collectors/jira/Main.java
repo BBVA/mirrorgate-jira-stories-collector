@@ -81,7 +81,7 @@ public class Main implements Runnable {
                 idSet.remove(issueDTO.getId());
             }
             if(result.size() == 0) {
-                idSet.stream().forEach((i) -> deleteIssue(i));
+                idSet.forEach(this::deleteIssue);
             }
             return result;
         };
@@ -110,7 +110,7 @@ public class Main implements Runnable {
                 SprintDTO current = i.getSprint();
                 if(current == null) {
                     current = idToSprint.get(i.getId());
-                    LOGGER.info("-> New Sprint {} asociation for issue {}", current.getName(), i.getId());
+                    LOGGER.info("-> New Sprint {} association for issue {}", current.getName(), i.getId());
                     toUpdate.add(current);
                 } else if(!current.equals(idToSprint.get(i.getId()))) {
                     LOGGER.info("-> Sprint changed {} for issue {}", current.getName(), i.getId());
