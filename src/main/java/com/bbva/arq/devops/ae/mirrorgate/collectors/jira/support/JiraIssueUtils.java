@@ -249,7 +249,9 @@ public class JiraIssueUtils {
                 LOGGER.error("Error parsing custom field: " + v, e);
             }
             try {
-                getCustomFieldValue(((JSONObject) v).get("child"), result);
+                if(((JSONObject) v).has("child")) {
+                    getCustomFieldValue(((JSONObject) v).get("child"), result);
+                }
             } catch (JSONException e) {
                 LOGGER.error("Error getting custom field value: " + v, e);
             }
