@@ -23,10 +23,6 @@ import com.atlassian.util.concurrent.Promise;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.Main;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.IssueDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueUtils;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
@@ -36,6 +32,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/webhook")
@@ -72,7 +73,7 @@ public class WebHookController {
 
     private static final String WEB_HOOK_EVENT_FIELD = "webhookEvent";
     private static final String WEB_HOOK_JIRA_ID_FIELD = "id";
-    private static final Logger LOGGER = LoggerFactory.getLogger(WebHookController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WebHookController.class);
 
     @Autowired
     private Main main;
@@ -90,7 +91,7 @@ public class WebHookController {
 
         String eventType = event.getString(WEB_HOOK_EVENT_FIELD);
 
-        LOGGER.info("Event {} received", eventType);
+        LOG.info("Event {} received", eventType);
 
         switch (JiraEvent.fromName(eventType)) {
             case IssueCreated:
@@ -111,7 +112,7 @@ public class WebHookController {
                 break;
 
             default:
-                LOGGER.info("Unhandled event type: {}", eventType);
+                LOG.info("Unhandled event type: {}", eventType);
         }
 
     }
@@ -131,13 +132,13 @@ public class WebHookController {
                         names.put(field.getId(), field.getName());
                         schema.put(field.getId(), new JSONObject().put("type", field.getFieldType().name()));
                     } catch (JSONException e) {
-                        LOGGER.error("Error reading field value from metadata", e);
+                        LOG.error("Error reading field value from metadata", e);
                     }
                 });
             } catch (InterruptedException e) {
-                LOGGER.error("Error, interrupted while generating parser", e);
+                LOG.error("Error, interrupted while generating parser", e);
             } catch (ExecutionException e) {
-                LOGGER.error("Error while generating parser", e);
+                LOG.error("Error while generating parser", e);
             }
 
             issueParser = new IssueJsonParser(names, schema);
@@ -156,12 +157,20 @@ public class WebHookController {
     }
 
     private void processIssueDeleteEvent(JSONObject issue) throws JSONException {
-        Long id = issue.getLong(WEB_HOOK_JIRA_ID_FIELD);
+        long id = issue.getLong(WEB_HOOK_JIRA_ID_FIELD);
+        if (id == 0) {
+            LOG.error("Error trying to delete issue {}" + issue);
+            return;
+        }
         main.deleteIssue(id);
     }
 
     private void processStringEvent(JSONObject event) throws JSONException{
         String id = event.getString(WEB_HOOK_JIRA_ID_FIELD);
+        if (id == null) {
+            LOG.error("Error trying to update spring from event {}" + event);
+            return;
+        }
         main.updateSprint(id);
     }
 

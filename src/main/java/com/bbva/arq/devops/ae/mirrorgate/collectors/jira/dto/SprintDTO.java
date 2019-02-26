@@ -17,6 +17,7 @@
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto;
 
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.SprintStatus;
+
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -59,29 +60,29 @@ public class SprintDTO implements Serializable {
     }
 
     public Date getStartDate() {
-        return startDate;
+        return startDate == null ? null : new Date(startDate.getTime());
     }
 
     public SprintDTO setStartDate(Date startDate) {
-        this.startDate = startDate;
+        this.startDate = startDate == null ? null : new Date(startDate.getTime());
         return this;
     }
 
     public Date getEndDate() {
-        return endDate;
+        return endDate == null ? null : new Date(endDate.getTime());
     }
 
     public SprintDTO setEndDate(Date endDate) {
-        this.endDate = endDate;
+        this.endDate = endDate == null ? null : new Date(endDate.getTime());
         return this;
     }
 
     public Date getCompleteDate() {
-        return completeDate;
+        return completeDate == null ? null : new Date(completeDate.getTime());
     }
 
     public SprintDTO setCompleteDate(Date completeDate) {
-        this.completeDate = completeDate;
+        this.completeDate = completeDate == null ? null : new Date(completeDate.getTime());
         return this;
     }
 
@@ -94,16 +95,4 @@ public class SprintDTO implements Serializable {
         return this;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if(!(o instanceof SprintDTO)) {
-            return false;
-        }
-        SprintDTO s = (SprintDTO) o;
-        return ((s.getId() == null && getId() == null) || s.getId().equals(getId())) &&
-                ((s.getName() == null && getName() == null) || s.getName().equals(getName())) &&
-                ((s.getStatus() == null && getStatus() == null) || s.getStatus().equals(getStatus())) &&
-                ((s.getStartDate() == null && getStartDate() == null) || s.getStartDate().equals(getStartDate())) &&
-                ((s.getEndDate() == null && getEndDate() == null) || s.getEndDate().equals(getEndDate()));
-    }
 }
