@@ -81,6 +81,7 @@ public class Main implements Runnable {
                 idSet.remove(issueDTO.getId());
             }
             if(result.size() == 0) {
+                LOGGER.info("-> Deleting: {}", idSet);
                 idSet.forEach(this::deleteIssue);
             }
             return result;
