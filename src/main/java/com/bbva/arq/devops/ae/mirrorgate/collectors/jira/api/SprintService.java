@@ -47,7 +47,7 @@ public class SprintService {
     private String collectorId;
 
     private static final String MIRROR_GATE_SEND_ISSUES_ENDPOINT="/api/issues";
-    private static final String MIRROR_GATE_HANDLE_ISSUE_ENDPOINT ="/api/issues/{id}";
+    private static final String MIRROR_GATE_DELETE_ISSUE_ENDPOINT ="/api/issues/{id}";
     private static final String MIRROR_GATE_GET_SPRINT_SAMPLE_ENDPOINT="/api/sprints/changing-sample";
     private static final String MIRROR_GATE_GET_SPRINT_ISSUES_ENDPOINT="/api/sprints/{id}";
 
@@ -68,9 +68,9 @@ public class SprintService {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.set("collectorId", collectorId);
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRROR_GATE_HANDLE_ISSUE_ENDPOINT).queryParams(params);
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRROR_GATE_DELETE_ISSUE_ENDPOINT + "/" + issueId).queryParams(params);
 
-        restTemplate.delete(builder.build().toUriString(), issueId);
+        restTemplate.delete(builder.build().toUriString());
     }
 
     public List<SprintDTO> getSprintSamples() {
@@ -91,7 +91,7 @@ public class SprintService {
 
             return restTemplate.getForObject(builder.build().toUriString(), SprintDTO.class, name);
         }catch(Exception e){
-            LOGGER.warn("Error getting sprint {}", name, e);
+            LOGGER.warn("Error getting sprint {}, {}", name, e);
             return null;
         }
     }
