@@ -68,9 +68,9 @@ public class SprintService {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.set("collectorId", collectorId);
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRROR_GATE_DELETE_ISSUE_ENDPOINT + "/" + issueId).queryParams(params);
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRROR_GATE_DELETE_ISSUE_ENDPOINT).queryParams(params);
 
-        restTemplate.delete(builder.build().toUriString());
+        restTemplate.delete(builder.build().toUriString(), issueId);
     }
 
     public List<SprintDTO> getSprintSamples() {
