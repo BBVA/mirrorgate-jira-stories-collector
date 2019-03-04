@@ -102,13 +102,14 @@ public class SprintService {
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRROR_GATE_GET_SPRINT_ISSUES_ENDPOINT).queryParams(params);
 
             return restTemplate.getForObject(builder.build().toUriString(), SprintDTO.class, name);
-        } catch (HttpClientErrorException e) {
+        }catch(HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                LOGGER.warn("Sprint {} does not exists", name);
+                LOGGER.warn("Sprint {} does not exist", name);
             } else {
                 LOGGER.error("Error getting sprint {}", name, e);
                 throw e;
             }
+            return null;
         }
     }
 
