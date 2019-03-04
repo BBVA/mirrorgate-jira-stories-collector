@@ -76,7 +76,7 @@ public class SprintService {
             restTemplate.delete(builder.build().toUriString(), issueId);
         } catch (final HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                LOGGER.info("Issue {} already deleted", issueId);
+                LOGGER.warn("Issue {} already deleted", issueId);
             } else {
                 LOGGER.error("Error trying to delete issue {}", issueId, e);
                 throw e;
@@ -102,8 +102,13 @@ public class SprintService {
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRROR_GATE_GET_SPRINT_ISSUES_ENDPOINT).queryParams(params);
 
             return restTemplate.getForObject(builder.build().toUriString(), SprintDTO.class, name);
-        }catch(Exception e){
-            LOGGER.warn("Error getting sprint {}, {}", name, e);
+        }catch(HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                LOGGER.warn("Sprint {} does not exist", name);
+            } else {
+                LOGGER.error("Error getting sprint {}", name, e);
+                throw e;
+            }
             return null;
         }
     }
