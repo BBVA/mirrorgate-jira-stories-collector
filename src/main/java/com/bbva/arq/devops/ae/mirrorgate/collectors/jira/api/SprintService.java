@@ -46,31 +46,31 @@ public class SprintService {
     private String mirrorGateUrl;
 
     @Value("${spring.application.name}")
-    private String collectorId;
+    private String appName;
 
-    private static final String MIRROR_GATE_SEND_ISSUES_ENDPOINT="/api/issues";
-    private static final String MIRROR_GATE_DELETE_ISSUE_ENDPOINT ="/api/issues/{id}";
-    private static final String MIRROR_GATE_GET_SPRINT_SAMPLE_ENDPOINT="/api/sprints/changing-sample";
-    private static final String MIRROR_GATE_GET_SPRINT_ISSUES_ENDPOINT="/api/sprints/{id}";
+    private static final String MIRRORGATE_SEND_ISSUES_ENDPOINT = "/api/issues";
+    private static final String MIRRORGATE_DELETE_ISSUE_ENDPOINT = "/api/issues/{id}";
+    private static final String MIRRORGATE_GET_SPRINT_SAMPLE_ENDPOINT = "/api/sprints/changing-sample";
+    private static final String MIRRORGATE_GET_SPRINT_ISSUES_ENDPOINT = "/api/sprints/{id}";
 
     @Autowired
     @Qualifier(Config.MIRRORGATE_REST_TEMPLATE)
-    RestTemplate restTemplate;
+    private RestTemplate restTemplate;
 
-    public ResponseEntity<List> sendIssues(List<IssueDTO> issues) {
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.set("collectorId", collectorId);
+    public ResponseEntity<List> sendIssues(final List<IssueDTO> issues) {
+        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.set("collectorId", appName);
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRROR_GATE_SEND_ISSUES_ENDPOINT).queryParams(params);
+        final UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRRORGATE_SEND_ISSUES_ENDPOINT).queryParams(params);
 
         return restTemplate.postForEntity(builder.build().toUriString(), issues, List.class);
     }
 
-    public void deleteIssue(Long issueId) {
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.set("collectorId", collectorId);
+    public void deleteIssue(final Long issueId) {
+        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.set("collectorId", appName);
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRROR_GATE_DELETE_ISSUE_ENDPOINT).queryParams(params);
+        final UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRRORGATE_DELETE_ISSUE_ENDPOINT).queryParams(params);
 
         try {
             restTemplate.delete(builder.build().toUriString(), issueId);
@@ -86,31 +86,31 @@ public class SprintService {
     }
 
     public List<SprintDTO> getSprintSamples() {
-        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-        params.set("collectorId", collectorId);
+        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.set("collectorId", appName);
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRROR_GATE_GET_SPRINT_SAMPLE_ENDPOINT).queryParams(params);
+        final UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRRORGATE_GET_SPRINT_SAMPLE_ENDPOINT).queryParams(params);
 
         return Arrays.asList(Objects.requireNonNull(restTemplate.getForObject(builder.build().toUriString(), SprintDTO[].class)));
     }
 
-    public SprintDTO getSprint(String name) {
+    public SprintDTO getSprint(final String name) {
         try{
-            MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-            params.set("collectorId", collectorId);
+            final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+            params.set("collectorId", appName);
 
-            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRROR_GATE_GET_SPRINT_ISSUES_ENDPOINT).queryParams(params);
+            final UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRRORGATE_GET_SPRINT_ISSUES_ENDPOINT).queryParams(params);
 
             return restTemplate.getForObject(builder.build().toUriString(), SprintDTO.class, name);
-        }catch(HttpClientErrorException e) {
+        } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 LOGGER.warn("Sprint {} does not exist", name);
             } else {
                 LOGGER.error("Error getting sprint {}", name, e);
                 throw e;
             }
-            return null;
         }
+        return null;
     }
 
 }

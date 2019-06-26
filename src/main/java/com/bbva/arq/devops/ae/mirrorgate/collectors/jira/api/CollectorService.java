@@ -24,8 +24,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Date;
 
@@ -43,29 +46,39 @@ public class CollectorService {
     @Value("${spring.application.name}")
     private String appName;
 
-    private static final String MIRROR_GATE_COLLECTOR_ENDPOINT="/api/collectors/{id}";
+    private static final String MIRRORGATE_COLLECTOR_ENDPOINT="/api/collectors/{id}";
 
     @Autowired
     @Qualifier(Config.MIRRORGATE_REST_TEMPLATE)
-    RestTemplate restTemplate;
+    private RestTemplate restTemplate;
 
-    public void update(Date date) {
-        restTemplate.put(mirrorGateUrl + MIRROR_GATE_COLLECTOR_ENDPOINT, date, appName);
+    public void update(final Date date) {
+        final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.set("collectorId", appName);
+
+        final UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRRORGATE_COLLECTOR_ENDPOINT).queryParams(params);
+
+        restTemplate.put(builder.build().toUriString(), date, appName);
     }
 
     public Date getUpdatedDate() {
         try {
-            return restTemplate.getForObject(mirrorGateUrl + MIRROR_GATE_COLLECTOR_ENDPOINT, Date.class, appName);
+            final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+            params.set("collectorId", appName);
+
+            final UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRRORGATE_COLLECTOR_ENDPOINT).queryParams(params);
+
+            return restTemplate.getForObject(builder.build().toUriString(), Date.class, appName);
         }
         catch (final HttpClientErrorException e) {
             if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 LOGGER.info("Not previous execution date found. Running from the very beginning so this could take a while");
-                return null;
             } else {
                 LOGGER.error("Error requesting previous collector status", e);
                 throw e;
             }
         }
+        return null;
     }
 
 }
