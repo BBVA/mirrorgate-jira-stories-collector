@@ -1,7 +1,6 @@
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service;
 
 import com.atlassian.jira.rest.client.api.MetadataRestClient;
-import com.atlassian.util.concurrent.Promise;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.exception.IssueMapException;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.IssueType;
@@ -9,6 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javax.annotation.PostConstruct;
+
+import io.atlassian.util.concurrent.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -98,8 +98,7 @@ public class JiraIssueUtils {
                 )
                 .setKeywords(buildKeywords(issue))
                 .setUrl(jiraUrl + "/browse/" + issue.getKey())
-                .setTeamName(getTeamName(getField(issue, JiraIssueFields.TEAM_NAME, JSONObject.class).get()))
-                ;
+                .setTeamName(getTeamName(getField(issue, JiraIssueFields.TEAM_NAME, JSONObject.class).get()));
     }
 
     private static Object getFieldValue(Issue issue, String field) {
