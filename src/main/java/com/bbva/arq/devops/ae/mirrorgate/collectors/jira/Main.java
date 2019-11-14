@@ -73,7 +73,7 @@ public class Main implements Runnable {
         while ((issues = pagedIssues.nextPage()).size() > 0) {
             LOG.info("-> Saving: {}", issues);
             sprintApi.sendIssues(issues);
-            if(updateCollectorsDate) {
+            if (updateCollectorsDate) {
                 collectorApi.update(issues.get(issues.size() - 1).getUpdatedDate());
             }
         }
@@ -87,7 +87,7 @@ public class Main implements Runnable {
             for (IssueDTO issueDTO : result) {
                 idSet.remove(issueDTO.getId());
             }
-            if(result.size() == 0) {
+            if (result.size() == 0) {
                 idSet.forEach(this::deleteIssue);
             }
             return result;
@@ -114,15 +114,15 @@ public class Main implements Runnable {
         while ((issues = samples.nextPage()).size() > 0) {
             LOG.info("-> Checking {}", issues.get(0));
             issues.forEach((i) -> {
-                SprintDTO current = i.getSprint();
-                if(current == null) {
-                    current = idToSprint.get(i.getId());
-                    LOG.info("-> New Sprint {} association for issue {}", current.getName(), i.getId());
-                    toUpdate.add(current);
-                } else if(!current.getId().equals(idToSprint.get(i.getId()).getId())) {
+                final SprintDTO current = i.getSprint();
+                final SprintDTO newSprint = idToSprint.get(i.getId());
+                if (current == null) {
+                    LOG.info("-> New Sprint {} association for issue {}", newSprint.getName(), i.getId());
+                    toUpdate.add(newSprint);
+                } else if (!current.getId().equals(newSprint.getId())) {
                     LOG.info("-> Sprint changed {} for issue {}", current.getName(), i.getId());
                     toUpdate.add(current);
-                    toUpdate.add(idToSprint.get(i.getId()));
+                    toUpdate.add(newSprint);
                 }
             });
         }
@@ -134,7 +134,7 @@ public class Main implements Runnable {
 
     public void updateSprint(final String id) {
         final SprintDTO sprint = sprintApi.getSprint(id);
-        if(sprint != null && sprint.getIssues() != null) {
+        if (sprint != null && sprint.getIssues() != null) {
             final List<Long> ids = sprint.getIssues().stream().map(IssueDTO::getId).collect(Collectors.toList());
             iterateAndSave(getIssuesByIdAndDeleteNotPresent(ids), false);
         } else {
