@@ -21,7 +21,6 @@ import static com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config.JI
 import com.atlassian.jira.rest.client.api.RestClientException;
 import com.atlassian.jira.rest.client.api.SearchRestClient;
 import com.atlassian.jira.rest.client.api.domain.SearchResult;
-import com.atlassian.util.concurrent.Promise;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.IssueDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Counter;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueUtils;
@@ -30,6 +29,8 @@ import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Pageable;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import io.atlassian.util.concurrent.Promise;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

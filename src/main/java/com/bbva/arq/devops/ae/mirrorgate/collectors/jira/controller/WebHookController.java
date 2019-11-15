@@ -19,10 +19,10 @@ package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.controller;
 import com.atlassian.jira.rest.client.api.MetadataRestClient;
 import com.atlassian.jira.rest.client.api.domain.Field;
 import com.atlassian.jira.rest.client.internal.json.IssueJsonParser;
-import com.atlassian.util.concurrent.Promise;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.Main;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.IssueDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueUtils;
+import io.atlassian.util.concurrent.Promise;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
@@ -159,7 +159,7 @@ public class WebHookController {
     private void processIssueDeleteEvent(JSONObject issue) throws JSONException {
         long id = issue.getLong(WEB_HOOK_JIRA_ID_FIELD);
         if (id == 0) {
-            LOG.error("Error trying to delete issue {}" + issue);
+            LOG.error("Error trying to delete issue {}", issue);
             return;
         }
         main.deleteIssue(id);
@@ -168,7 +168,7 @@ public class WebHookController {
     private void processStringEvent(JSONObject event) throws JSONException{
         String id = event.getString(WEB_HOOK_JIRA_ID_FIELD);
         if (id == null) {
-            LOG.error("Error trying to update spring from event {}" + event);
+            LOG.error("Error trying to update spring from event {}", event);
             return;
         }
         main.updateSprint(id);

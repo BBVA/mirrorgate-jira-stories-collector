@@ -22,17 +22,23 @@ import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.IssueDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.SprintDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service.IssuesService;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Pageable;
-import java.util.*;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Component
 public class Main implements Runnable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Main.class);
 
     @Autowired
     private SprintService sprintApi;
@@ -49,31 +55,31 @@ public class Main implements Runnable {
 
             @Override
             public List<IssueDTO> nextPage() {
-                List<IssueDTO> value = returned ? new ArrayList<>() : issues;
+                final List<IssueDTO> value = returned ? new ArrayList<>() : issues;
                 returned = true;
                 return value;
             }
         }, false);
     }
 
-    public void deleteIssue(Long id) {
-        LOGGER.info("-> Deleting: {}", id);
+    public void deleteIssue(final Long id) {
+        LOG.info("-> Deleting: {}", id);
         sprintApi.deleteIssue(id);
     }
 
-    private void iterateAndSave(Pageable<IssueDTO> pagedIssues, boolean updateCollectorsDate) {
+    private void iterateAndSave(final Pageable<IssueDTO> pagedIssues, final boolean updateCollectorsDate) {
         List<IssueDTO> issues;
 
         while ((issues = pagedIssues.nextPage()).size() > 0) {
-            LOGGER.info("-> Saving: {}", issues);
+            LOG.info("-> Saving: {}", issues);
             sprintApi.sendIssues(issues);
-            if(updateCollectorsDate) {
+            if (updateCollectorsDate) {
                 collectorApi.update(issues.get(issues.size() - 1).getUpdatedDate());
             }
         }
     }
 
-    private Pageable<IssueDTO> getIssuesByIdAndDeleteNotPresent(List<Long> ids) {
+    private Pageable<IssueDTO> getIssuesByIdAndDeleteNotPresent(final List<Long> ids) {
         final Set<Long> idSet = new HashSet<>(ids);
         final Pageable<IssueDTO> wrapped = service.getById(ids);
         return () -> {
@@ -81,7 +87,7 @@ public class Main implements Runnable {
             for (IssueDTO issueDTO : result) {
                 idSet.remove(issueDTO.getId());
             }
-            if(result.size() == 0) {
+            if (result.size() == 0) {
                 idSet.forEach(this::deleteIssue);
             }
             return result;
@@ -101,48 +107,50 @@ public class Main implements Runnable {
             }
         });
 
-        Pageable<IssueDTO> samples = getIssuesByIdAndDeleteNotPresent(ids);
+        final Pageable<IssueDTO> samples = getIssuesByIdAndDeleteNotPresent(ids);
 
-        List<SprintDTO> toUpdate = new ArrayList<>();
+        final List<SprintDTO> toUpdate = new ArrayList<>();
         List<IssueDTO> issues;
         while ((issues = samples.nextPage()).size() > 0) {
-            LOGGER.info("-> Checking {}", issues.get(0));
+            LOG.info("-> Checking {}", issues.get(0));
             issues.forEach((i) -> {
-                SprintDTO current = i.getSprint();
-                if(current == null) {
-                    current = idToSprint.get(i.getId());
-                    LOGGER.info("-> New Sprint {} association for issue {}", current.getName(), i.getId());
+                final SprintDTO current = i.getSprint();
+                final SprintDTO newSprint = idToSprint.get(i.getId());
+                if (current == null) {
+                    LOG.info("-> New Sprint {} association for issue {}", newSprint.getName(), i.getId());
+                    toUpdate.add(newSprint);
+                } else if (!current.getId().equals(newSprint.getId())) {
+                    LOG.info("-> Sprint changed {} for issue {}", current.getName(), i.getId());
                     toUpdate.add(current);
-                } else if(!current.equals(idToSprint.get(i.getId()))) {
-                    LOGGER.info("-> Sprint changed {} for issue {}", current.getName(), i.getId());
-                    toUpdate.add(current);
-                    toUpdate.add(idToSprint.get(i.getId()));
+                    toUpdate.add(newSprint);
                 }
             });
         }
-        LOGGER.info("-> Needs updating: {}", toUpdate);
+
+        final List<String> springIdsToUpdate = toUpdate.stream().map(SprintDTO::getId).collect(Collectors.toList());
+        LOG.info("-> Needs updating: {}", springIdsToUpdate);
         return toUpdate;
     }
 
-    public void updateSprint(String id) {
-        SprintDTO sprint = sprintApi.getSprint(id);
-        if(sprint != null && sprint.getIssues() != null) {
-            List<Long> ids = sprint.getIssues().stream().map(IssueDTO::getId).collect(Collectors.toList());
+    public void updateSprint(final String id) {
+        final SprintDTO sprint = sprintApi.getSprint(id);
+        if (sprint != null && sprint.getIssues() != null) {
+            final List<Long> ids = sprint.getIssues().stream().map(IssueDTO::getId).collect(Collectors.toList());
             iterateAndSave(getIssuesByIdAndDeleteNotPresent(ids), false);
         } else {
-            LOGGER.warn("-> Could not update the sprint {}", id);
+            LOG.warn("-> Could not update the sprint {}", id);
         }
     }
 
     public synchronized void run() {
 
-        LOGGER.info("Starting");
+        LOG.info("Starting");
         iterateAndSave(service.getRecentIssues(), true);
 
-        for(SprintDTO s : getSprintsThatNeedUpdating()) {
+        for (final SprintDTO s : getSprintsThatNeedUpdating()) {
             updateSprint(s.getId());
         }
 
-        LOGGER.info("Ending");
+        LOG.info("Ending");
     }
 }
