@@ -16,7 +16,7 @@
 
 buildscript {
 	ext {
-		springBootVersion = '2.2.1.RELEASE'
+		springBootVersion = '2.2.6.RELEASE'
 	}
 	repositories {
 		mavenCentral()
@@ -24,7 +24,7 @@ buildscript {
 	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-		classpath "com.github.ben-manes:gradle-versions-plugin:0.27.0"
+		classpath "com.github.ben-manes:gradle-versions-plugin:0.28.0"
 	}
 }
 
@@ -58,7 +58,7 @@ dependencies {
 			'org.springframework:spring-web'
 	)
 
-	implementation('com.atlassian.jira:jira-rest-java-client-core:5.1.6')
+	implementation('com.atlassian.jira:jira-rest-java-client-core:5.2.1')
 	implementation('io.atlassian.fugue:fugue:4.7.2')
 
 	implementation('org.hibernate:hibernate-validator:6.1.0.Final')

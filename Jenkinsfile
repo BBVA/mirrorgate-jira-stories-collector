@@ -36,7 +36,7 @@ node('global') {
     if(env.BRANCH_NAME == 'master' || env.BRANCH_NAME == 'develop') {
         stage('Docker - build docker image') {
             sh """
-            docker build -t bbvaae/mirrorgate-jira-stories-collector .
+                docker build -t bbvaae/mirrorgate-jira-stories-collector .
             """
         }
 
