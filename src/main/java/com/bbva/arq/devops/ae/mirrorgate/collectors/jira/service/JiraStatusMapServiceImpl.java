@@ -37,7 +37,7 @@ public class JiraStatusMapServiceImpl implements StatusMapService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JiraStatusMapServiceImpl.class);
 
-    private static final String SERVER_URI="/rest/api/2/status/";
+    private static final String SERVER_URI = "/rest/api/2/status/";
 
     @Value("${jira.url}")
     private String jiraUrl;
@@ -62,11 +62,11 @@ public class JiraStatusMapServiceImpl implements StatusMapService {
     private IssueStatus getStatus(Object status) {
         IssueStatus value = issueStatusMapping.get(getName(status));
         Object category = ((Map) status).get("statusCategory");
-        if(value != null) {
+        if (value != null) {
             return value;
         }
         value = issueStatusMapping.get(getName(category));
-        if(value != null) {
+        if (value != null) {
             return value;
         }
         value = issueStatusMapping.get(getField(category, "key"));
@@ -78,16 +78,16 @@ public class JiraStatusMapServiceImpl implements StatusMapService {
     }
 
     private static String getField(Object map, String field) {
-        return (String)((Map) map).get(field);
+        return (String) ((Map) map).get(field);
     }
 
     private synchronized Map<Long, IssueStatus> getStatusMappings() {
 
-        if(statusCache == null) {
+        if (statusCache == null) {
             List jsa = restTemplate.getForObject(jiraUrl + SERVER_URI, ArrayList.class);
             statusCache = (Map<Long, IssueStatus>) Objects.requireNonNull(jsa).stream().collect(Collectors.toMap(
-                    (status) -> Long.parseLong(getField(status, "id")),
-                    this::getStatus
+                (status) -> Long.parseLong(getField(status, "id")),
+                this::getStatus
             ));
         }
 
@@ -97,7 +97,7 @@ public class JiraStatusMapServiceImpl implements StatusMapService {
     @Override
     public IssueStatus getStatusFor(Status status) {
         IssueStatus issueStatus = getStatusMappings().get(status.getId());
-        if(issueStatus == null) {
+        if (issueStatus == null) {
             LOGGER.warn("IssueStatus not found for {} with id {}", status.getName(), status.getId());
         }
         return issueStatus;

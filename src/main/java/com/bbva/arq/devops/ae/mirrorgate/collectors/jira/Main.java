@@ -22,11 +22,6 @@ import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.IssueDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.SprintDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service.IssuesService;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Pageable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,6 +29,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 
 @Component
 public class Main implements Runnable {
@@ -67,7 +67,10 @@ public class Main implements Runnable {
         sprintApi.deleteIssue(id);
     }
 
-    private void iterateAndSave(final Pageable<IssueDTO> pagedIssues, final boolean updateCollectorsDate) {
+    private void iterateAndSave(
+        final Pageable<IssueDTO> pagedIssues,
+        final boolean updateCollectorsDate
+    ) {
         List<IssueDTO> issues;
 
         while ((issues = pagedIssues.nextPage()).size() > 0) {
@@ -117,7 +120,8 @@ public class Main implements Runnable {
                 final SprintDTO current = i.getSprint();
                 final SprintDTO newSprint = idToSprint.get(i.getId());
                 if (current == null) {
-                    LOG.info("-> New Sprint {} association for issue {}", newSprint.getName(), i.getId());
+                    LOG.info("-> New Sprint {} association for issue {}",
+                        newSprint.getName(), i.getId());
                     toUpdate.add(newSprint);
                 } else if (!current.getId().equals(newSprint.getId())) {
                     LOG.info("-> Sprint changed {} for issue {}", current.getName(), i.getId());
@@ -127,7 +131,8 @@ public class Main implements Runnable {
             });
         }
 
-        final List<String> springIdsToUpdate = toUpdate.stream().map(SprintDTO::getId).collect(Collectors.toList());
+        final List<String> springIdsToUpdate = toUpdate.stream()
+            .map(SprintDTO::getId).collect(Collectors.toList());
         LOG.info("-> Needs updating: {}", springIdsToUpdate);
         return toUpdate;
     }
@@ -135,7 +140,8 @@ public class Main implements Runnable {
     public void updateSprint(final String id) {
         final SprintDTO sprint = sprintApi.getSprint(id);
         if (sprint != null && sprint.getIssues() != null) {
-            final List<Long> ids = sprint.getIssues().stream().map(IssueDTO::getId).collect(Collectors.toList());
+            final List<Long> ids = sprint.getIssues().stream()
+                .map(IssueDTO::getId).collect(Collectors.toList());
             iterateAndSave(getIssuesByIdAndDeleteNotPresent(ids), false);
         } else {
             LOG.warn("-> Could not update the sprint {}", id);

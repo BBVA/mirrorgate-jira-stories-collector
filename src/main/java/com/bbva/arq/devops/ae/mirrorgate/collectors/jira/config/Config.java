@@ -24,9 +24,13 @@ import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.IssueStatus;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.IssueType;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -96,7 +100,7 @@ public class Config {
 
     @Bean
     public synchronized JiraRestClient getJiraRestClient() {
-        if(restClientInstance == null) {
+        if (restClientInstance == null) {
             URI jiraServerUri = null;
             try {
                 jiraServerUri = new URI(jiraUrl);
@@ -104,9 +108,9 @@ public class Config {
                 e.printStackTrace();
             }
             restClientInstance = new AsynchronousJiraRestClientFactory()
-                    .createWithBasicHttpAuthentication(jiraServerUri,
-                            jiraUserName,
-                            jiraPassword);
+                .createWithBasicHttpAuthentication(jiraServerUri,
+                    jiraUserName,
+                    jiraPassword);
         }
         return restClientInstance;
     }
@@ -124,11 +128,12 @@ public class Config {
     @Bean(MIRRORGATE_REST_TEMPLATE)
     public RestTemplate getRestTemplate() {
         RestTemplate restTemplate = new RestTemplate();
-        MappingJackson2HttpMessageConverter jsonHttpMessageConverter = new MappingJackson2HttpMessageConverter();
+        MappingJackson2HttpMessageConverter jsonHttpMessageConverter =
+            new MappingJackson2HttpMessageConverter();
         restTemplate.getMessageConverters().add(jsonHttpMessageConverter);
-        if(!StringUtils.isBlank(mirrorGateUserName) && !StringUtils.isBlank(mirrorGatePassword)) {
+        if (!StringUtils.isBlank(mirrorGateUserName) && !StringUtils.isBlank(mirrorGatePassword)) {
             restTemplate.getInterceptors().add(
-                    new BasicAuthenticationInterceptor(mirrorGateUserName, mirrorGatePassword));
+                new BasicAuthenticationInterceptor(mirrorGateUserName, mirrorGatePassword));
         }
 
         return restTemplate;
@@ -137,10 +142,11 @@ public class Config {
     @Bean(JIRA_REST_TEMPLATE)
     public RestTemplate getJiraRestTemplate() {
         RestTemplate restTemplate = new RestTemplate();
-        MappingJackson2HttpMessageConverter jsonHttpMessageConverter = new MappingJackson2HttpMessageConverter();
+        MappingJackson2HttpMessageConverter jsonHttpMessageConverter
+            = new MappingJackson2HttpMessageConverter();
         restTemplate.getMessageConverters().add(jsonHttpMessageConverter);
         restTemplate.getInterceptors().add(
-                new BasicAuthenticationInterceptor(jiraUserName, jiraPassword));
+            new BasicAuthenticationInterceptor(jiraUserName, jiraPassword));
         return restTemplate;
     }
 
@@ -188,7 +194,7 @@ public class Config {
     @Bean
     public TimeZone getTimeZone() {
         TimeZone tz = TimeZone.getDefault();
-        if(!StringUtils.isBlank(jiraTimeZone)) {
+        if (!StringUtils.isBlank(jiraTimeZone)) {
             tz = TimeZone.getTimeZone(jiraTimeZone);
         }
 

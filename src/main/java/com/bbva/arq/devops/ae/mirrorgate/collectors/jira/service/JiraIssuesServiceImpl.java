@@ -25,12 +25,13 @@ import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.IssueDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Counter;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueUtils;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.Pageable;
-
-import java.util.*;
+import io.atlassian.util.concurrent.Promise;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
-import io.atlassian.util.concurrent.Promise;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,9 +44,9 @@ public class JiraIssuesServiceImpl implements IssuesService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JiraIssuesServiceImpl.class);
 
-    private static final String ISSUES_QUERY_PATTERN="updatedDate>='%s' AND issueType in(%s) ORDER BY updated ASC";
-    private static final String ISSUES_BY_ID_QUERY_PATTERN="id IN (%s)";
-    private static final int PAGE_SIZE=10;
+    private static final String ISSUES_QUERY_PATTERN = "updatedDate>='%s' AND issueType in(%s) ORDER BY updated ASC";
+    private static final String ISSUES_BY_ID_QUERY_PATTERN = "id IN (%s)";
+    private static final int PAGE_SIZE = 10;
 
     private final String issueTypes;
 
@@ -84,10 +85,10 @@ public class JiraIssuesServiceImpl implements IssuesService {
 
         return (() -> {
 
-            Promise<SearchResult> results = client.searchJql(query,PAGE_SIZE,page.inc(),null);
+            Promise<SearchResult> results = client.searchJql(query, PAGE_SIZE, page.inc(), null);
 
-            return StreamSupport.stream(results.claim().getIssues().spliterator(),false)
-                    .map(utils::map).collect(Collectors.toList());
+            return StreamSupport.stream(results.claim().getIssues().spliterator(), false)
+                .map(utils::map).collect(Collectors.toList());
         });
     }
 
@@ -98,31 +99,32 @@ public class JiraIssuesServiceImpl implements IssuesService {
 
         return (() -> {
             int firstItem = counter.get();
-            if(counter.get() >= ids.size()) {
+            if (counter.get() >= ids.size()) {
                 return new ArrayList<>();
             }
-            for(int i = 0; i < PAGE_SIZE && counter.get() < ids.size(); counter.inc(), i++) {
-                if(i > 0) {
+            for (int i = 0; i < PAGE_SIZE && counter.get() < ids.size(); counter.inc(), i++) {
+                if (i > 0) {
                     sb.append(',');
                 }
                 sb.append(ids.get(counter.get()));
             }
             String query = String.format(ISSUES_BY_ID_QUERY_PATTERN, sb.toString());
-            sb.delete(0,sb.length());
+            sb.delete(0, sb.length());
 
             LOGGER.info("-> Running Jira Query: {}", query);
             try {
                 Promise<SearchResult> results = client.searchJql(query);
-                return StreamSupport.stream(results.claim().getIssues().spliterator(),false)
-                        .map(utils::map).collect(Collectors.toList());
+                return StreamSupport.stream(results.claim().getIssues().spliterator(), false)
+                    .map(utils::map).collect(Collectors.toList());
             }  catch (RestClientException e) {
                 LOGGER.warn("Exception", e);
                 int statusCode = e.getStatusCode().isPresent() ? e.getStatusCode().get() : 0;
-                if (statusCode == 401 ) {
-                    LOGGER.error("Error 401 connecting to JIRA server, your credentials are probably wrong. Note: Ensure you are using JIRA user name not your email address.");
+                if (statusCode == 401) {
+                    LOGGER.error("Error 401 connecting to JIRA server, your credentials are probably wrong. "
+                        + "Note: Ensure you are using JIRA user name not your email address.");
                     throw e;
-                } else if(statusCode == 400) {
-                    if(ids.size() == 1) {
+                } else if (statusCode == 400) {
+                    if (ids.size() == 1) {
                         return new ArrayList<>();
                     } else {
                         LOGGER.warn("Error 400 - Some issues where not found {}, keep on", ids);
@@ -135,7 +137,8 @@ public class JiraIssuesServiceImpl implements IssuesService {
                         return result;
                     }
                 } else {
-                    LOGGER.error("No result was available from Jira unexpectedly - defaulting to blank response. The reason for this fault is the following:" + e.getCause());
+                    LOGGER.error("No result was available from Jira unexpectedly - defaulting to blank response. "
+                        + "The reason for this fault is the following:" + e.getCause());
                     throw e;
                 }
             }

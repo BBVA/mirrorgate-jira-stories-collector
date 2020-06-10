@@ -4,12 +4,11 @@ import com.atlassian.jira.rest.client.api.MetadataRestClient;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.exception.IssueMapException;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.IssueType;
+import io.atlassian.util.concurrent.Promise;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javax.annotation.PostConstruct;
-
-import io.atlassian.util.concurrent.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,21 +42,21 @@ public class JiraIssueTypeMapServiceImpl implements IssueTypeMapService {
     public String getIssueTypeFor(com.atlassian.jira.rest.client.api.domain.IssueType type) {
         String pre = issueTypeCache.get(type.getId());
         IssueType target = pre == null ? null : issueTypeMapping.get(pre);
-        if(target == null) {
+        if (target == null) {
             LOGGER.warn("Type mapping not found for {} with id {}", type.getName(), type.getId());
         }
         return target == null ? null : target.getName();
     }
 
     @PostConstruct
-    private void createJiraIssueTypeMap(){
+    private void createJiraIssueTypeMap() {
         Promise<Iterable<com.atlassian.jira.rest.client.api.domain.IssueType>> issueTypesPromise =
             metadataRestClient.getIssueTypes();
 
         try {
             Iterable<com.atlassian.jira.rest.client.api.domain.IssueType> issueTypes = issueTypesPromise.get();
             issueTypes.forEach(
-               issueType -> issueTypeCache.put(issueType.getId(), issueType.getName())
+                issueType -> issueTypeCache.put(issueType.getId(), issueType.getName())
             );
         } catch (InterruptedException e) {
             LOGGER.error("Interrupted Exception while trying to recover issue types");

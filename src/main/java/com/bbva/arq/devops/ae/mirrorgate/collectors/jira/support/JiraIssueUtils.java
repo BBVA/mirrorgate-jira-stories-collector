@@ -27,6 +27,19 @@ import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.ProjectDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.SprintDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service.IssueTypeMapService;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service.StatusMapService;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -37,14 +50,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.io.Serializable;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 @Component
 public class JiraIssueUtils {
@@ -103,10 +108,10 @@ public class JiraIssueUtils {
 
     private static Object getFieldValue(Issue issue, String field) {
         Object out = null;
-        IssueField iField = issue.getField(field);
+        IssueField issueField = issue.getField(field);
 
-        if (iField != null) {
-            out = iField.getValue();
+        if (issueField != null) {
+            out = issueField.getValue();
         }
 
         return out;
@@ -182,9 +187,7 @@ public class JiraIssueUtils {
     }
 
     private List<SprintDTO> getSprintList(List<String> data) {
-        return data == null ?
-                null :
-                data.stream().map(this::parseSprint).collect(Collectors.toList());
+        return data == null ? null : data.stream().map(this::parseSprint).collect(Collectors.toList());
     }
 
     public SprintDTO parseSprint(String data) {

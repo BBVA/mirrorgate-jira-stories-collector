@@ -24,7 +24,10 @@ import org.springframework.context.ConfigurableApplicationContext;
 public class MirrorgateJiraStoriesCollectorApplication {
 
     public static void main(String[] args) {
-        ConfigurableApplicationContext ctx = SpringApplication.run(MirrorgateJiraStoriesCollectorApplication.class, args);
+        ConfigurableApplicationContext ctx = SpringApplication.run(
+            MirrorgateJiraStoriesCollectorApplication.class,
+            args
+        );
         ctx.getBean(Main.class).run();
     }
 }

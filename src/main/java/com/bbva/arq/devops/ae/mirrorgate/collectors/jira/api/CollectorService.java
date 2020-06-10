@@ -17,6 +17,7 @@
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.api;
 
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config;
+import java.util.Date;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +30,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.util.Date;
 
 /**
  * Created by alfonso on 26/05/17.
@@ -46,7 +45,7 @@ public class CollectorService {
     @Value("${spring.application.name}")
     private String appName;
 
-    private static final String MIRRORGATE_COLLECTOR_ENDPOINT="/api/collectors/{id}";
+    private static final String MIRRORGATE_COLLECTOR_ENDPOINT = "/api/collectors/{id}";
 
     @Autowired
     @Qualifier(Config.MIRRORGATE_REST_TEMPLATE)
@@ -56,7 +55,8 @@ public class CollectorService {
         final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.set("collectorId", appName);
 
-        final UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRRORGATE_COLLECTOR_ENDPOINT).queryParams(params);
+        final UriComponentsBuilder builder = UriComponentsBuilder
+            .fromHttpUrl(mirrorGateUrl + MIRRORGATE_COLLECTOR_ENDPOINT).queryParams(params);
 
         restTemplate.put(builder.build().toUriString(), date, appName);
     }
@@ -66,13 +66,14 @@ public class CollectorService {
             final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
             params.set("collectorId", appName);
 
-            final UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRRORGATE_COLLECTOR_ENDPOINT).queryParams(params);
+            final UriComponentsBuilder builder = UriComponentsBuilder
+                .fromHttpUrl(mirrorGateUrl + MIRRORGATE_COLLECTOR_ENDPOINT).queryParams(params);
 
             return restTemplate.getForObject(builder.build().toUriString(), Date.class, appName);
-        }
-        catch (final HttpClientErrorException e) {
-            if(e.getStatusCode() == HttpStatus.NOT_FOUND) {
-                LOGGER.info("Not previous execution date found. Running from the very beginning so this could take a while");
+        } catch (final HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                LOGGER.info("Not previous execution date found. "
+                    + "Running from the very beginning so this could take a while");
             } else {
                 LOGGER.error("Error requesting previous collector status", e);
                 throw e;

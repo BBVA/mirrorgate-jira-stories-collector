@@ -17,7 +17,6 @@
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto;
 
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.SprintStatus;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
