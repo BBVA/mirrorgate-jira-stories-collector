@@ -22,11 +22,11 @@ public class Counter {
     private final int increment;
 
     public Counter() {
-        this(0,1);
+        this(0, 1);
     }
 
     public Counter(int increment) {
-        this(0,increment);
+        this(0, increment);
     }
 
     private Counter(int value, int increment) {

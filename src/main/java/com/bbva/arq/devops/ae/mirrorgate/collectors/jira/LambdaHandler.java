@@ -26,7 +26,7 @@ public class LambdaHandler implements RequestHandler<Object, String> {
     private static ConfigurableApplicationContext ctx;
 
     private static synchronized ConfigurableApplicationContext getContext() {
-        if(ctx == null) {
+        if (ctx == null) {
             ctx = SpringApplication.run(MirrorgateJiraStoriesCollectorApplication.class);
         }
         return ctx;

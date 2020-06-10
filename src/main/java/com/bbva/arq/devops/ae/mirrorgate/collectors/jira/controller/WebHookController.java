@@ -23,6 +23,10 @@ import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.Main;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.IssueDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support.JiraIssueUtils;
 import io.atlassian.util.concurrent.Promise;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
@@ -33,26 +37,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-
 @RestController
 @RequestMapping("/webhook")
 public class WebHookController {
 
     private enum JiraEvent {
 
-        IssueCreated ("jira:issue_created"),
-        IssueUpdated ("jira:issue_updated"),
-        IssueDeleted ("jira:issue_deleted"),
-        SprintCreated ("sprint_created"),
-        SprintUpdated ("sprint_updated"),
-        SprintDeleted ("sprint_deleted"),
-        SprintOpened ("sprint_opened"),
-        SprintClosed ("sprint_closed"),
-        Unknown ("?");
+        IssueCreated("jira:issue_created"),
+        IssueUpdated("jira:issue_updated"),
+        IssueDeleted("jira:issue_deleted"),
+        SprintCreated("sprint_created"),
+        SprintUpdated("sprint_updated"),
+        SprintDeleted("sprint_deleted"),
+        SprintOpened("sprint_opened"),
+        SprintClosed("sprint_closed"),
+        Unknown("?");
 
 
         private final String name;
@@ -66,7 +65,9 @@ public class WebHookController {
         }
 
         static JiraEvent fromName(String name) {
-            Optional<JiraEvent> event = Arrays.stream(JiraEvent.values()).filter((e) -> e.getName().equals(name)).findFirst();
+            Optional<JiraEvent> event = Arrays.stream(JiraEvent.values())
+                .filter((e) -> e.getName().equals(name))
+                .findFirst();
             return event.orElse(Unknown);
         }
     }
@@ -84,7 +85,7 @@ public class WebHookController {
     @Autowired
     private JiraIssueUtils utils;
 
-    @RequestMapping(value="", method = RequestMethod.POST)
+    @RequestMapping(value = "", method = RequestMethod.POST)
     public void receiveJiraEvent(@RequestBody String eventJson) throws JSONException {
 
         JSONObject event = new JSONObject(eventJson);
@@ -120,7 +121,7 @@ public class WebHookController {
     private IssueJsonParser issueParser;
 
     private synchronized IssueJsonParser getParser() {
-        if(issueParser == null) {
+        if (issueParser == null) {
             Promise<Iterable<Field>> fields = client.getFields();
 
             JSONObject names = new JSONObject();
@@ -148,10 +149,10 @@ public class WebHookController {
 
     private void processIssueEvent(JSONObject issue) throws JSONException {
         //Ugly hack for Jira not to fail due to missing field
-        issue.put("expand","names,schema");
+        issue.put("expand", "names,schema");
         IssueDTO issueBean = utils.map(getParser().parse(issue));
 
-        if(issueBean.getType() != null) {
+        if (issueBean.getType() != null) {
             main.updateIssuesOnDemand(Collections.singletonList(issueBean));
         }
     }
@@ -165,7 +166,7 @@ public class WebHookController {
         main.deleteIssue(id);
     }
 
-    private void processStringEvent(JSONObject event) throws JSONException{
+    private void processStringEvent(JSONObject event) throws JSONException {
         String id = event.getString(WEB_HOOK_JIRA_ID_FIELD);
         if (id == null) {
             LOG.error("Error trying to update spring from event {}", event);

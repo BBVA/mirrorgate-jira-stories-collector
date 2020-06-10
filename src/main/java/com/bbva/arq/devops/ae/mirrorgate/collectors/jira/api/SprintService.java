@@ -19,6 +19,9 @@ package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.api;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.config.Config;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.IssueDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.SprintDTO;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +35,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 
 @Component
 public class SprintService {
@@ -61,7 +60,9 @@ public class SprintService {
         final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.set("collectorId", appName);
 
-        final UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRRORGATE_SEND_ISSUES_ENDPOINT).queryParams(params);
+        final UriComponentsBuilder builder = UriComponentsBuilder
+            .fromHttpUrl(mirrorGateUrl + MIRRORGATE_SEND_ISSUES_ENDPOINT)
+            .queryParams(params);
 
         return restTemplate.postForEntity(builder.build().toUriString(), issues, List.class);
     }
@@ -70,7 +71,8 @@ public class SprintService {
         final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.set("collectorId", appName);
 
-        final UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRRORGATE_DELETE_ISSUE_ENDPOINT).queryParams(params);
+        final UriComponentsBuilder builder = UriComponentsBuilder
+            .fromHttpUrl(mirrorGateUrl + MIRRORGATE_DELETE_ISSUE_ENDPOINT).queryParams(params);
 
         try {
             restTemplate.delete(builder.build().toUriString(), issueId);
@@ -89,17 +91,25 @@ public class SprintService {
         final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.set("collectorId", appName);
 
-        final UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRRORGATE_GET_SPRINT_SAMPLE_ENDPOINT).queryParams(params);
+        final UriComponentsBuilder builder = UriComponentsBuilder
+            .fromHttpUrl(mirrorGateUrl + MIRRORGATE_GET_SPRINT_SAMPLE_ENDPOINT)
+            .queryParams(params);
 
-        return Arrays.asList(Objects.requireNonNull(restTemplate.getForObject(builder.build().toUriString(), SprintDTO[].class)));
+        return Arrays.asList(
+            Objects.requireNonNull(
+                restTemplate.getForObject(builder.build().toUriString(), SprintDTO[].class)
+            )
+        );
     }
 
     public SprintDTO getSprint(final String name) {
-        try{
+        try {
             final MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
             params.set("collectorId", appName);
 
-            final UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(mirrorGateUrl + MIRRORGATE_GET_SPRINT_ISSUES_ENDPOINT).queryParams(params);
+            final UriComponentsBuilder builder = UriComponentsBuilder
+                .fromHttpUrl(mirrorGateUrl + MIRRORGATE_GET_SPRINT_ISSUES_ENDPOINT)
+                .queryParams(params);
 
             return restTemplate.getForObject(builder.build().toUriString(), SprintDTO.class, name);
         } catch (HttpClientErrorException e) {

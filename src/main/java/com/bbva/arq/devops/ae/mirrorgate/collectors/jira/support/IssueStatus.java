@@ -23,11 +23,13 @@ public enum IssueStatus {
 
     IN_PROGRESS("In Progress"), DONE("Done"), BACKLOG("Backlog"), WAITING("Waiting"), IMPEDED("Impeded");
 
-    private static final Map<String, IssueStatus> NAME_MAP = new HashMap<String, IssueStatus>(){{
-        for(IssueStatus st : IssueStatus.values()) {
-            put(st.getName(), st);
+    private static final Map<String, IssueStatus> NAME_MAP = new HashMap<>() {
+        {
+            for (IssueStatus st : IssueStatus.values()) {
+                put(st.getName(), st);
+            }
         }
-    }};
+    };
 
     private final String name;
 

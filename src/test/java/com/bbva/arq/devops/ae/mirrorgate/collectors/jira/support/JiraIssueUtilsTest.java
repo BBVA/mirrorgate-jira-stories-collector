@@ -16,6 +16,10 @@
 
 package com.bbva.arq.devops.ae.mirrorgate.collectors.jira.support;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.dto.SprintDTO;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service.IssueTypeMapService;
 import com.bbva.arq.devops.ae.mirrorgate.collectors.jira.service.StatusMapService;
@@ -30,8 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -52,13 +54,22 @@ public class JiraIssueUtilsTest {
     private JiraIssueUtils issueUtils;
 
     @Before
-    public void init(){
+    public void init() {
         issueUtils = new JiraIssueUtils(keywordsFields, jiraFields, statusMapService, issueTypeMapService);
     }
 
     @Test
     public void itShouldParseSprintsCorrectly() {
-        String in = "com.atlassian.greenhopper.service.sprint.Sprint@20d5ab81[id=1003,rapidViewId=879,state=CLOSED,name=SOME_SPRINT,startDate=2017-02-22T07:00:27.314+01:00,endDate=2017-03-07T19:00:00.000+01:00,completeDate=2017-03-08T10:29:26.122+01:00,sequence=1003]";
+        String in = "com.atlassian.greenhopper.service.sprint.Sprint@20d5ab81["
+            + "id=1003,"
+            + "rapidViewId=879,"
+            + "state=CLOSED,"
+            + "name=SOME_SPRINT,"
+            + "startDate=2017-02-22T07:00:27.314+01:00,"
+            + "endDate=2017-03-07T19:00:00.000+01:00,"
+            + "completeDate=2017-03-08T10:29:26.122+01:00,"
+            + "sequence=1003"
+            + "]";
         SprintDTO out = issueUtils.parseSprint(in);
 
         assertEquals(out.getId(), "1003");
@@ -72,9 +83,29 @@ public class JiraIssueUtilsTest {
 
     @Test
     public void itShouldGetTheMoreRecentActiveSprint() {
-        SprintDTO sprint = issueUtils.getPriorSprint(Arrays.asList(
-                "com.atlassian.greenhopper.service.sprint.Sprint@19057bee[id=1879,rapidViewId=879,state=CLOSED,name=MIRRORGATE_PI03_2017_SP2,startDate=2017-06-14T11:59:37.474+02:00,endDate=2017-06-27T18:59:00.000+02:00,completeDate=2017-06-28T10:20:49.865+02:00,sequence=1879]",
-                "com.atlassian.greenhopper.service.sprint.Sprint@81010b9[id=1941,rapidViewId=879,state=ACTIVE,name=MIRRORGATE_PI03_2017_SP3,startDate=2017-06-28T09:00:15.296+02:00,endDate=2017-07-11T21:00:00.000+02:00,completeDate=<null>,sequence=1941]")
+        SprintDTO sprint = issueUtils.getPriorSprint(
+            Arrays.asList(
+                "com.atlassian.greenhopper.service.sprint.Sprint@19057bee["
+                    + "id=1879,"
+                    + "rapidViewId=879,"
+                    + "state=CLOSED,"
+                    + "name=MIRRORGATE_PI03_2017_SP2,"
+                    + "startDate=2017-06-14T11:59:37.474+02:00,"
+                    + "endDate=2017-06-27T18:59:00.000+02:00,"
+                    + "completeDate=2017-06-28T10:20:49.865+02:00,"
+                    + "sequence=1879"
+                    + "]",
+                "com.atlassian.greenhopper.service.sprint.Sprint@81010b9["
+                    + "id=1941,"
+                    + "rapidViewId=879,"
+                    + "state=ACTIVE,"
+                    + "name=MIRRORGATE_PI03_2017_SP3,"
+                    + "startDate=2017-06-28T09:00:15.296+02:00,"
+                    + "endDate=2017-07-11T21:00:00.000+02:00,"
+                    + "completeDate=<null>,"
+                    + "sequence=1941"
+                    + "]"
+            )
         );
 
         assertEquals(sprint.getName(), "MIRRORGATE_PI03_2017_SP3");
@@ -82,9 +113,29 @@ public class JiraIssueUtilsTest {
 
     @Test
     public void itShouldGetTheMoreRecentActiveSprintEvenWhenSooner() {
-        SprintDTO sprint = issueUtils.getPriorSprint(Arrays.asList(
-                "com.atlassian.greenhopper.service.sprint.Sprint@19057bee[id=1879,rapidViewId=879,state=CLOSED,name=MIRRORGATE_PI03_2017_SP2,startDate=2017-06-14T11:59:37.474+02:00,endDate=2018-06-27T18:59:00.000+02:00,completeDate=2017-06-28T10:20:49.865+02:00,sequence=1879]",
-                "com.atlassian.greenhopper.service.sprint.Sprint@81010b9[id=1941,rapidViewId=879,state=ACTIVE,name=MIRRORGATE_PI03_2017_SP3,startDate=2017-06-28T09:00:15.296+02:00,endDate=2017-07-11T21:00:00.000+02:00,completeDate=<null>,sequence=1941]")
+        SprintDTO sprint = issueUtils.getPriorSprint(
+            Arrays.asList(
+                "com.atlassian.greenhopper.service.sprint.Sprint @ 19057 bee["
+                    + "id=1879,"
+                    + "rapidViewId=879,"
+                    + "state=CLOSED,"
+                    + "name=MIRRORGATE_PI03_2017_SP2,"
+                    + "startDate=2017-06-14T11:59:37.474+02:00,"
+                    + "endDate=2018-06-27T18:59:00.000+02:00,"
+                    + "completeDate=2017-06-28T10:20:49.865+02:00,"
+                    + "sequence=1879"
+                    + "]",
+                "com.atlassian.greenhopper.service.sprint.Sprint@81010b9["
+                    + "id=1941,"
+                    + "rapidViewId=879,"
+                    + "state=ACTIVE,"
+                    + "name=MIRRORGATE_PI03_2017_SP3,"
+                    + "startDate=2017-06-28T09:00:15.296+02:00,"
+                    + "endDate=2017-07-11T21:00:00.000+02:00,"
+                    + "completeDate=<null>,"
+                    + "sequence=1941"
+                    + "]"
+            )
         );
 
         assertEquals(sprint.getName(), "MIRRORGATE_PI03_2017_SP3");
@@ -92,9 +143,29 @@ public class JiraIssueUtilsTest {
 
     @Test
     public void itShouldGetActiveSprintAndNotFailOnMissingData() {
-        SprintDTO sprint = issueUtils.getPriorSprint(Arrays.asList(
-                "com.atlassian.greenhopper.service.sprint.Sprint@19057bee[id=1879,rapidViewId=879,state=CLOSED,name=MIRRORGATE_PI03_2017_SP2,startDate=2017-06-14T11:59:37.474+02:00,endDate=<null>,completeDate=2017-06-28T10:20:49.865+02:00,sequence=1879]",
-                "com.atlassian.greenhopper.service.sprint.Sprint@81010b9[id=1941,rapidViewId=879,state=CLOSED,name=MIRRORGATE_PI03_2017_SP3,startDate=2017-06-28T09:00:15.296+02:00,endDate=<null>,completeDate=<null>,sequence=1941]")
+        SprintDTO sprint = issueUtils.getPriorSprint(
+            Arrays.asList(
+                "com.atlassian.greenhopper.service.sprint.Sprint@19057bee["
+                    + "id=1879,"
+                    + "rapidViewId=879,"
+                    + "state=CLOSED,"
+                    + "name=MIRRORGATE_PI03_2017_SP2,"
+                    + "startDate=2017-06-14T11:59:37.474+02:00,"
+                    + "endDate=<null>,"
+                    + "completeDate=2017-06-28T10:20:49.865+02:00,"
+                    + "sequence=1879"
+                    + "]",
+                "com.atlassian.greenhopper.service.sprint.Sprint@81010b9["
+                    + "id=1941,"
+                    + "rapidViewId=879,"
+                    + "state=CLOSED,"
+                    + "name=MIRRORGATE_PI03_2017_SP3,"
+                    + "startDate=2017-06-28T09:00:15.296+02:00,"
+                    + "endDate=<null>,"
+                    + "completeDate=<null>,"
+                    + "sequence=1941"
+                    + "]"
+            )
         );
 
         assertNotNull(sprint.getName());
@@ -111,7 +182,6 @@ public class JiraIssueUtilsTest {
         assertNull(out.getStartDate());
         assertNull(out.getEndDate());
         assertNull(out.getCompleteDate());
-
     }
 
     @Test
@@ -120,7 +190,5 @@ public class JiraIssueUtilsTest {
         SprintDTO out = issueUtils.parseSprint(in);
 
         assertNull(out);
-
     }
-
 }
